@@ -44,3 +44,8 @@ Temporary Items
 C#/bin
 C++/Release
 C++/x64
+
+Java/**/*.class
+Java/*.jar
+C++/queens
+Python/__pycache__
