@@ -49,3 +49,4 @@ Java/**/*.class
 Java/*.jar
 C++/queens
 Python/__pycache__
+output.txt
