@@ -19,8 +19,9 @@ all: $(TARGET)
 clean:
 	$(RM) queens
 
-$(TARGET): main.cpp chess.cpp
+$(TARGET): main.cpp chess.cpp containers.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 main.cpp: chess.h
-chess.cpp: chess.h
+chess.cpp: chess.h containers.h
+containers.cpp: containers.h

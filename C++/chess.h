@@ -14,19 +14,14 @@
 #include <ostream>
 #include <vector>
 #include <stack>
-
-struct Pair
-{
-    int index;
-    int value;
-};
+#include "containers.h"
 
 class Chess
 {
 public:
 
 	// Constructor
-	explicit Chess(int size);
+	explicit Chess(int _size) : size(_size), nSteps(0), queens(std::vector< Set >(_size, Set(_size))) {}
 
 	// Solve queens problem
 	bool solve();
@@ -54,16 +49,9 @@ private:
 	// Get index of a unsolved row (minimum remaining values heuristics)
 	int selectIndex();
 
-    // Select all available indices from a row
-    int selectValues(const int *array, int *values);
-
-    // Get the __only__ value that is set in the array
-    int getValue(const int *array) const;
-
 	int size;							// Number of queens
 	long long nSteps;					// Number of calls to Assign()
-	std::vector< int* > queens;	        // Queens' positions (set of candidate positions)
-    std::vector<int> queensCount;       // Number of available values
+	std::vector< Set > queens;	        // Queens' positions (set of candidate positions)
 	std::stack<Pair> discardedPairs;    // Discarded candidates (index-value)
 	std::stack<int> discardedCount;		// Number of discards in the last assignation
 };
