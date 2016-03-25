@@ -9,11 +9,23 @@
  ******************************************************************************/
 
 #include "chess.h"
+#include <ctime>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 
 using namespace std;
+
+//------------------------------------------------------------------------------
+// Initialize seed for random generator
+
+// TODO: Test with Visual Studio
+
+__attribute__((constructor)) static int auto_rand()
+{
+    srand(time(NULL));
+    return 0;
+}
 
 //------------------------------------------------------------------------------
 // Constructor
@@ -207,10 +219,14 @@ int Chess::selectIndex()
 int Chess::selectValues(const char *array, int *values)
 {
     int nvalues = 0;
+    int index;
+    int offset = (int)((double)rand() / RAND_MAX * size);
 
     for (int i = 0; i < size; i++) {
-        if (array[i])
-            values[nvalues++] = i;
+        index = (offset + i) % size;
+
+        if (array[index])
+            values[nvalues++] = index;
     }
 
     return nvalues;
