@@ -9,10 +9,11 @@
  ******************************************************************************/
 
 #include "chess.h"
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 
 using namespace std;
-
-
 
 static int* newPair(int a, int b)
 {
@@ -25,15 +26,17 @@ static int* newPair(int a, int b)
 //------------------------------------------------------------------------------
 // Constructor
 
-Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< set<int> >(_size))
+Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< int* >(_size)), queensCount(vector<int>(_size, _size))
 {
-	set<int> completeSet;
+	int complete[_size];
 
 	for (int i = 0; i < _size; i++)
-		completeSet.insert(i);
+        complete[i] = 1;
 
-	for (int i = 0; i < _size; i++)
-		queens[i] = completeSet;
+	for (int i = 0; i < _size; i++) {
+		queens[i] = new int[_size];
+        memcpy(queens[i], complete, sizeof(int) * _size);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -42,19 +45,22 @@ Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< set<int> >(_siz
 bool Chess::solve()
 {
 	int index = selectIndex();
-	set<int> currentSet;
-	set<int>::iterator itValue;
+	int currentSet[size];
+    int values[size];
+    int nvalues;
 
 	if (index == -1)
 		return true;
 
-	currentSet = queens[index];
-	
-	for (itValue = currentSet.begin(); itValue != currentSet.end(); ++itValue) {
-		int value = *itValue;
+	memcpy(currentSet, queens[index], sizeof(int) * size);
+    nvalues = selectValues(currentSet, values);
+
+	for (int i = 0; i < nvalues; i++) {
+		int value = values[i];
 
 		if (!assign(index, value)) {
-			queens[index] = currentSet;
+			memcpy(queens[index], currentSet, sizeof(int) * size);
+            queensCount[index] = nvalues;
 			continue;
 		}
 
@@ -62,7 +68,8 @@ bool Chess::solve()
 			return true;
 
 		restoreLast();
-		queens[index] = currentSet;
+        memcpy(queens[index], currentSet, sizeof(int) * size);
+        queensCount[index] = nvalues;
 	}
 
 	return false;
@@ -74,11 +81,11 @@ bool Chess::solve()
 ostream& operator<< (ostream &stream, const Chess &chess)
 {
 	for (int i = 0; i < chess.size; i++) {
-		if (chess.queens[i].size() != 1)
+		if (chess.queensCount[i] != 1)
 			stream << "Reina " << i + 1 << " no resuelta.\n";
 
 		else {
-			int value = *chess.queens[i].begin();
+			int value = chess.getValue(chess.queens[i]);
 			stream << "Reina " << (i + 1) << ": casilla " << (value + 1) << endl;
 		}
 	}
@@ -94,7 +101,8 @@ bool Chess::assign(int index, int value)
 	int diag1, diag2;
 	nSteps++;
 
-	queens[index].clear();
+	memset(queens[index], 0, sizeof(int) * size);
+    queensCount[index] = 0;
 	discardedCount.push(0);
 
 	for (int i = 0; i < size; i++) {
@@ -110,7 +118,8 @@ bool Chess::assign(int index, int value)
 		}
 	}
 
-	queens[index].insert(value);
+	queens[index][value] = 1;
+    queensCount[index] = 1;
 	return true;
 }
 
@@ -121,17 +130,19 @@ bool Chess::discard(int index, int value)
 {
 	int diag1, diag2;
 
-	if (queens[index].erase(value) == 0)
-		return true;
+    if (value < 0 || value >= size || !queens[index][value])
+        return true;
 
+    queens[index][value] = 0;
+    queensCount[index]--;
 	discardedPairs.push(newPair(index, value));
 	discardedCount.top() += 1;
 
-	if (queens[index].size() == 0)
+	if (queensCount[index] == 0)
 		return false;
 
-	if (queens[index].size() == 1) {
-		value = *queens[index].begin();
+	if (queensCount[index] == 1) {
+		value = getValue(queens[index]);
 
 		for (int i = 0; i < size; i++) {
 			if (i == index)
@@ -140,7 +151,7 @@ bool Chess::discard(int index, int value)
 			diag1 = value + (index - i);
 			diag2 = value - (index - i);
 
-			if (!(discard(i, value) && discard(i, diag1) && discard(i, diag2))) 
+			if (!(discard(i, value) && discard(i, diag1) && discard(i, diag2)))
 				return false;
 		}
 	}
@@ -153,14 +164,19 @@ bool Chess::discard(int index, int value)
 
 void Chess::restoreLast()
 {
-	int *pair;
+    int *pair;
 	int n = discardedCount.top();
+
 
 	for (int i = 0; i < n; i++) {
 		pair = discardedPairs.top();
-		queens[pair[0]].insert(pair[1]);
+
+        if (!queens[pair[0]][pair[1]]) {
+            queens[pair[0]][pair[1]] = 1;
+            queensCount[pair[0]]++;
+        }
+
 		discardedPairs.pop();
-		delete [] pair;
 	}
 
 	discardedCount.pop();
@@ -175,7 +191,7 @@ int Chess::selectIndex()
 	int index = -1;
 
 	for (int i = 0; i < size; i++) {
-		curSize = queens[i].size();
+		curSize = queensCount[i];
 
 		if (curSize > 1 && curSize < minSize) {
 			index = i;
@@ -184,4 +200,30 @@ int Chess::selectIndex()
 	}
 
 	return index;
+}
+
+//------------------------------------------------------------------------------
+// Select all available indices from a row
+int Chess::selectValues(const int *array, int *values)
+{
+    int nvalues = 0;
+
+    for (int i = 0; i < size; i++) {
+        if (array[i])
+            values[nvalues++] = i;
+    }
+
+    return nvalues;
+}
+
+//------------------------------------------------------------------------------
+// Get the __only__ value that is set in the array
+int Chess::getValue(const int *array) const {
+    for (int i = 0; i < size; i++)
+        if (array[i])
+            return i;
+
+    cerr << "Error inesperado: array vacio.\n";
+    exit(EXIT_FAILURE);
+    return -1;
 }
