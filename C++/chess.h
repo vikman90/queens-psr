@@ -28,6 +28,9 @@ public:
 	// Constructor
 	explicit Chess(int size);
 
+    // Destructor
+    ~Chess();
+
 	// Solve queens problem
 	bool solve();
 

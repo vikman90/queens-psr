@@ -26,9 +26,18 @@ Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< int* >(_size)),
         complete[i] = 1;
 
 	for (int i = 0; i < _size; i++) {
-		queens[i] = new int[_size];
+		queens[i] = (int*)malloc(_size * sizeof(int));
         memcpy(queens[i], complete, sizeof(int) * _size);
     }
+}
+
+//------------------------------------------------------------------------------
+// Destructor
+
+Chess::~Chess()
+{
+    for (int i = 0; i < size; i++)
+        free(queens[i]);
 }
 
 //------------------------------------------------------------------------------
