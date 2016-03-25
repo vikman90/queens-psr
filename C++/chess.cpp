@@ -18,16 +18,16 @@ using namespace std;
 //------------------------------------------------------------------------------
 // Constructor
 
-Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< int* >(_size)), queensCount(vector<int>(_size, _size))
+Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< char* >(_size)), queensCount(vector<int>(_size, _size))
 {
-	int complete[_size];
+	char complete[_size];
 
 	for (int i = 0; i < _size; i++)
         complete[i] = 1;
 
 	for (int i = 0; i < _size; i++) {
-		queens[i] = (int*)malloc(_size * sizeof(int));
-        memcpy(queens[i], complete, sizeof(int) * _size);
+		queens[i] = (char*)malloc(_size);
+        memcpy(queens[i], complete, _size);
     }
 }
 
@@ -46,21 +46,21 @@ Chess::~Chess()
 bool Chess::solve()
 {
 	int index = selectIndex();
-	int currentSet[size];
+	char currentSet[size];
     int values[size];
     int nvalues;
 
 	if (index == -1)
 		return true;
 
-	memcpy(currentSet, queens[index], sizeof(int) * size);
+	memcpy(currentSet, queens[index], size);
     nvalues = selectValues(currentSet, values);
 
 	for (int i = 0; i < nvalues; i++) {
 		int value = values[i];
 
 		if (!assign(index, value)) {
-			memcpy(queens[index], currentSet, sizeof(int) * size);
+			memcpy(queens[index], currentSet, size);
             queensCount[index] = nvalues;
 			continue;
 		}
@@ -69,7 +69,7 @@ bool Chess::solve()
 			return true;
 
 		restoreLast();
-        memcpy(queens[index], currentSet, sizeof(int) * size);
+        memcpy(queens[index], currentSet, size);
         queensCount[index] = nvalues;
 	}
 
@@ -102,7 +102,7 @@ bool Chess::assign(int index, int value)
 	int diag1, diag2;
 	nSteps++;
 
-	memset(queens[index], 0, sizeof(int) * size);
+	memset(queens[index], 0, size);
     queensCount[index] = 0;
 	discardedCount.push(0);
 
@@ -204,7 +204,7 @@ int Chess::selectIndex()
 
 //------------------------------------------------------------------------------
 // Select all available indices from a row
-int Chess::selectValues(const int *array, int *values)
+int Chess::selectValues(const char *array, int *values)
 {
     int nvalues = 0;
 
@@ -218,7 +218,7 @@ int Chess::selectValues(const int *array, int *values)
 
 //------------------------------------------------------------------------------
 // Get the __only__ value that is set in the array
-int Chess::getValue(const int *array) const {
+int Chess::getValue(const char *array) const {
     for (int i = 0; i < size; i++)
         if (array[i])
             return i;

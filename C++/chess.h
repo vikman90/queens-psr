@@ -58,14 +58,14 @@ private:
 	int selectIndex();
 
     // Select all available indices from a row
-    int selectValues(const int *array, int *values);
+    int selectValues(const char *array, int *values);
 
     // Get the __only__ value that is set in the array
-    int getValue(const int *array) const;
+    int getValue(const char *array) const;
 
 	int size;							// Number of queens
 	long long nSteps;					// Number of calls to Assign()
-	std::vector< int* > queens;	        // Queens' positions (set of candidate positions)
+	std::vector< char* > queens;  // Queens' positions (set of candidate positions)
     std::vector<int> queensCount;       // Number of available values
 	std::stack<Pair> discardedPairs;    // Discarded candidates (index-value)
 	std::stack<int> discardedCount;		// Number of discards in the last assignation
