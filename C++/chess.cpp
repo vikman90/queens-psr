@@ -5,7 +5,7 @@
  * Copyleft 2013 Vikman - All rights revoked.
  * vikman90.blogspot.com - vmfdez90@gmail.com
  * February 8, 2013
- * 
+ *
  ******************************************************************************/
 
 #include "chess.h"
@@ -14,14 +14,6 @@
 #include <iostream>
 
 using namespace std;
-
-static int* newPair(int a, int b)
-{
-	int *pair = new int[2];
-	pair[0] = a;
-	pair[1] = b;
-	return pair;
-}
 
 //------------------------------------------------------------------------------
 // Constructor
@@ -135,7 +127,7 @@ bool Chess::discard(int index, int value)
 
     queens[index][value] = 0;
     queensCount[index]--;
-	discardedPairs.push(newPair(index, value));
+	discardedPairs.push(Pair {index, value});
 	discardedCount.top() += 1;
 
 	if (queensCount[index] == 0)
@@ -164,16 +156,15 @@ bool Chess::discard(int index, int value)
 
 void Chess::restoreLast()
 {
-    int *pair;
+    Pair pair;
 	int n = discardedCount.top();
-
 
 	for (int i = 0; i < n; i++) {
 		pair = discardedPairs.top();
 
-        if (!queens[pair[0]][pair[1]]) {
-            queens[pair[0]][pair[1]] = 1;
-            queensCount[pair[0]]++;
+        if (!queens[pair.index][pair.value]) {
+            queens[pair.index][pair.value] = 1;
+            queensCount[pair.index]++;
         }
 
 		discardedPairs.pop();

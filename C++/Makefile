@@ -10,7 +10,7 @@
 ################################################################################
 
 TARGET		= queens
-CXXFLAGS	= -O2 -pipe -Wall -Wextra
+CXXFLAGS	= -O2 -pipe -Wall -Wextra -std=c++11
 
 .PHONY: all clean
 
