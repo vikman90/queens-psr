@@ -14,6 +14,7 @@ mt_srand();
 class Chess {
     private $size;
     private $queens;
+    private $queensCount;
     private $nsteps;
     private $stackDiscarded;
     private $stackCount;
@@ -24,6 +25,7 @@ class Chess {
     public function __construct($size) {
         $this->size = $size;
         $this->queens = array_fill(0, $size, array_fill(0, $size, 1));
+        $this->queensCount = array_fill(0, $size, $size);
         $this->nsteps = 0;
         $this->stackDiscarded = [];
         $this->stackCount = [];
@@ -44,6 +46,7 @@ class Chess {
         foreach ($values as $value) {
             if (!$this->assign($index, $value)) {
                 $this->queens[$index] = $row;
+                $this->queensCount[$index] = count($values);
                 continue;
             }
 
@@ -52,6 +55,7 @@ class Chess {
 
             $this->restoreLast();
             $this->queens[$index] = $row;
+            $this->queensCount[$index] = count($values);
         }
 
         return false;
@@ -65,7 +69,7 @@ class Chess {
         $index = -1;
 
         for ($i = 0; $i < $this->size; $i++) {
-            $curSize = count($this->queens[$i]);
+            $curSize = $this->queensCount[$i];
 
             if ($curSize > 1 and $curSize < $minSize) {
                 $index = $i;
@@ -80,7 +84,8 @@ class Chess {
     // Assign a value to a row and propagate constraints
 
     private function assign($index, $value) {
-        $this->queens[$index] = [];
+        $this->queens[$index] = array_fill(0, $this->size, 0);
+        $this->queensCount[$index] = 0;
         $this->stackCount[] = 0;
         $this->nsteps++;
 
@@ -99,6 +104,7 @@ class Chess {
         }
 
         $this->queens[$index][$value] = 1;
+        $this->queensCount[$index] = 1;
         return true;
     }
 
@@ -106,20 +112,20 @@ class Chess {
     // Discard candidate values (constraints propagation)
 
     private function discard($index, $value) {
-        $row = $this->queens[$index];
-
-        if (!isset($row[$value]))
+        if ($value < 0 or $value >= $this->size or !$this->queens[$index][$value])
             return true;
 
-        unset($row[$value]);
+        $this->queens[$index][$value] = 0;
+        $this->queensCount[$index]--;
         $this->stackDiscarded[] = [$index, $value];
         $this->stackCount[count($this->stackCount) - 1]++;
 
-        if (count($row) == 0)
+        if ($this->queensCount[$index] == 0)
             return false;
 
-        if (count($row) == 1) {
-            $value = array_keys($row)[0];
+
+        if ($this->queensCount[$index] == 1) {
+            $value = array_search(1, $this->queens[$index]);
 
             for ($i = 0; $i < $this->size; $i++) {
                 if ($i == $index)
@@ -130,7 +136,6 @@ class Chess {
 
                 if (!($this->discard($i, $value) and $this->discard($i, $diag1) and
                       $this->discard($i, $diag2))) {
-                    $this->restoreLast();
                     return false;
                 }
             }
@@ -147,7 +152,11 @@ class Chess {
 
         for ($i = 0; $i < $n; $i++) {
             $pair = array_pop($this->stackDiscarded);
-            $this->queens[$pair[0]][$pair[1]] = 1;
+
+            if (!$this->queens[$pair[0]][$pair[1]]) {
+                $this->queens[$pair[0]][$pair[1]] = 1;
+                $this->queensCount[$pair[0]]++;
+            }
         }
     }
 
@@ -161,7 +170,7 @@ class Chess {
         for ($i = 0; $i < count($array); $i++) {
             $index = ($offset + $i) % $this->size;
 
-            if (isset($array[$index]))
+            if ($array[$index])
                 $values[] = $index;
         }
 
@@ -183,7 +192,7 @@ class Chess {
 
         for ($i = 0; $i < $this->size; $i++) {
             $j = $i + 1;
-            $value = array_keys($this->queens[$i])[0] + 1;
+            $value = array_search(1, $this->queens[$i]) + 1;
             $string .= "Reina $j: $value\n";
         }
 
