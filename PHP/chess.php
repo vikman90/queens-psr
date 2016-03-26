@@ -191,8 +191,13 @@ class Chess {
 
         for ($i = 0; $i < $this->size; $i++) {
             $j = $i + 1;
-            $value = array_search(1, $this->queens[$i]) + 1;
-            $string .= "Reina $j: $value\n";
+
+            if ($this->queensCount[$i] != 1)
+                $string .= "Reina $j no resuelta\n";
+            else {
+                $value = array_search(1, $this->queens[$i]) + 1;
+                $string .= "Reina $j: $value\n";
+            }
         }
 
         return $string;
