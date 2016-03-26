@@ -63,12 +63,12 @@ private:
     // Get the __only__ value that is set in the array
     int getValue(const char *array) const;
 
-	int size;							// Number of queens
-	long long nSteps;					// Number of calls to Assign()
-	std::vector< char* > queens;  // Queens' positions (set of candidate positions)
+	int size;                           // Number of queens
+	long long nSteps;                   // Number of calls to Assign()
+	std::vector< char* > queens;        // Queens' positions (set of candidate positions)
     std::vector<int> queensCount;       // Number of available values
 	std::stack<Pair> discardedPairs;    // Discarded candidates (index-value)
-	std::stack<int> discardedCount;		// Number of discards in the last assignation
+	std::stack<int> discardedCount;     // Number of discards in the last assignation
 };
 
 #endif

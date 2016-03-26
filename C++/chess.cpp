@@ -32,14 +32,9 @@ __attribute__((constructor)) static int auto_rand()
 
 Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< char* >(_size)), queensCount(vector<int>(_size, _size))
 {
-	char complete[_size];
-
-	for (int i = 0; i < _size; i++)
-        complete[i] = 1;
-
 	for (int i = 0; i < _size; i++) {
 		queens[i] = (char*)malloc(_size);
-        memcpy(queens[i], complete, _size);
+        memset(queens[i], 1, _size);
     }
 }
 
@@ -111,9 +106,7 @@ ostream& operator<< (ostream &stream, const Chess &chess)
 
 bool Chess::assign(int index, int value)
 {
-	int diag1, diag2;
 	nSteps++;
-
 	memset(queens[index], 0, size);
     queensCount[index] = 0;
 	discardedCount.push(0);
@@ -122,8 +115,8 @@ bool Chess::assign(int index, int value)
 		if (i == index)
 			continue;
 
-		diag1 = value + (index - i);
-		diag2 = value - (index - i);
+		int diag1 = value + (index - i);
+		int diag2 = value - (index - i);
 
 		if (!(discard(i, value) && discard(i, diag1) && discard(i, diag2))) {
 			restoreLast();
@@ -141,8 +134,6 @@ bool Chess::assign(int index, int value)
 
 bool Chess::discard(int index, int value)
 {
-	int diag1, diag2;
-
     if (value < 0 || value >= size || !queens[index][value])
         return true;
 
@@ -161,8 +152,8 @@ bool Chess::discard(int index, int value)
 			if (i == index)
 				continue;
 
-			diag1 = value + (index - i);
-			diag2 = value - (index - i);
+			int diag1 = value + (index - i);
+			int diag2 = value - (index - i);
 
 			if (!(discard(i, value) && discard(i, diag1) && discard(i, diag2)))
 				return false;
@@ -216,6 +207,7 @@ int Chess::selectIndex()
 
 //------------------------------------------------------------------------------
 // Select all available indices from a row
+
 int Chess::selectValues(const char *array, int *values)
 {
     int nvalues = 0;
@@ -234,12 +226,11 @@ int Chess::selectValues(const char *array, int *values)
 
 //------------------------------------------------------------------------------
 // Get the __only__ value that is set in the array
+
 int Chess::getValue(const char *array) const {
     for (int i = 0; i < size; i++)
         if (array[i])
             return i;
 
-    cerr << "Error inesperado: array vacio.\n";
-    exit(EXIT_FAILURE);
     return -1;
 }

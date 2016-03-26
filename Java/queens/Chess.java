@@ -7,30 +7,31 @@
  *
  *****************************************************************************
  */
+
 package queens;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 
 public class Chess {
 
     //--------------------------------------------------------------------------
     // Constructor
-    @SuppressWarnings("unchecked")
+
     public Chess(int size) {
-        HashSet<Integer> completeSet = new HashSet<Integer>(size);
+        byte[] complete = new byte[size];
 
         this.size = size;
         this.nSteps = 0;
-        this.board = new ArrayList<HashSet<Integer>>(size);
+        this.queens = new ArrayList<byte[]>(size);
+        this.queensCount = new ArrayList<Integer>(size);
+
+        Arrays.fill(complete, (byte)1);
 
         for (int i = 0; i < size; i++) {
-            completeSet.add(i);
-        }
-
-        for (int i = 0; i < size; i++) {
-            this.board.add((HashSet<Integer>) completeSet.clone());
+            this.queens.add((byte[])complete.clone());
+            this.queensCount.add(size);
         }
 
         this.discardedPairs = new ArrayDeque<int[]>();
@@ -39,21 +40,25 @@ public class Chess {
 
     //--------------------------------------------------------------------------
     // Solve queens problem
-    @SuppressWarnings("unchecked")
+
     public boolean solve() {
         int index = selectIndex();
-        HashSet<Integer> currentSet;
+        byte[] currentSet;
+        int[] values = new int[size];
+        int nvalues;
 
-        if (index == -1) {
+        if (index == -1)
             return true;
-        }
 
-        currentSet = board.get(index);
-        board.set(index, (HashSet<Integer>) currentSet.clone());
+        currentSet = (byte[])queens.get(index).clone();
+        nvalues = selectValues(currentSet, values);
 
-        for (int value : currentSet) {
+        for (int i = 0; i < nvalues; i++) {
+            int value = values[i];
+
             if (!assign(index, value)) {
-                board.set(index, (HashSet<Integer>) currentSet.clone());
+                System.arraycopy(currentSet, 0, queens.get(index), 0, size);
+                queensCount.set(index, nvalues);
                 continue;
             }
 
@@ -62,7 +67,8 @@ public class Chess {
             }
 
             restoreLast();
-            board.set(index, (HashSet<Integer>) currentSet.clone());
+            System.arraycopy(currentSet, 0, queens.get(index), 0, size);
+            queensCount.set(index, nvalues);
         }
 
         return false;
@@ -70,17 +76,17 @@ public class Chess {
 
     //--------------------------------------------------------------------------
     // Representation of the chessboard
+
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < size; i++) {
-            if (board.get(i).size() != 1) {
-                System.err.println("Error: Fila " + (i + 1) + " no resuelta.");
-                return "";
+            if (queensCount.get(i) != 1)
+                builder.append("Fila " + (i + 1) + " no resuelta.\n");
+            else    {
+                int value = getValue(queens.get(i));
+                builder.append("Reina " + (i + 1) + ": casilla " + (value + 1) + "\n");
             }
-
-            int value = board.get(i).iterator().next() + 1;
-            builder.append("Reina " + (i + 1) + ": casilla " + (value + 1) + "\n");
         }
 
         return builder.toString();
@@ -88,20 +94,18 @@ public class Chess {
 
     //--------------------------------------------------------------------------
     // Get number of total tries of assignation
+
     public long getSteps() {
         return nSteps;
     }
 
     //--------------------------------------------------------------------------
     // Assign a value to a row and propagate constraints
+
     private boolean assign(int index, int value) {
-        HashSet<Integer> set = board.get(index);
-
-        assert set.size() > 0;
-        assert set.contains(value);
-        set.clear();
         nSteps++;
-
+        Arrays.fill(queens.get(index), (byte)0);
+        queensCount.set(index, 0);
         discardedCount.push(0);
 
         for (int i = 0; i < size; i++) {
@@ -118,28 +122,31 @@ public class Chess {
             }
         }
 
-        set.add(value);
+        queens.get(index)[value] = 1;
+        queensCount.set(index, 1);
         return true;
     }
 
     //--------------------------------------------------------------------------
     // Discard candidate values (constraints propagation)
+
     private boolean discard(int index, int value) {
-        HashSet<Integer> set = board.get(index);
+        int count;
 
-        if (!set.remove(value)) {
+        if (value < 0 || value >= size || queens.get(index)[value] == 0)
             return true;
-        }
 
-        discardedPairs.push(new int[]{index, value});
+        queens.get(index)[value] = 0;
+        count = queensCount.get(index) - 1;
+        queensCount.set(index, count);
+        discardedPairs.push(new int[] {index, value});
         discardedCount.push(discardedCount.pop() + 1);
 
-        if (set.size() == 0) {
+        if (count == 0)
             return false;
-        }
 
-        if (set.size() == 1) {
-            value = set.iterator().next();
+        if (count == 1) {
+            value = getValue(queens.get(index));
 
             for (int i = 0; i < size; i++) {
                 if (i == index) {
@@ -160,30 +167,30 @@ public class Chess {
 
     //--------------------------------------------------------------------------
     // Undo last assignation (restore constraints)
+
     private void restoreLast() {
         int n = discardedCount.pop();
 
         for (int i = 0; i < n; i++) {
             int[] pair = discardedPairs.pop();
-            board.get(pair[0]).add(pair[1]);
+            byte[] array = queens.get(pair[0]);
+
+            if (array[pair[1]] == 0) {
+                array[pair[1]] = 1;
+                queensCount.set(pair[0], queensCount.get(pair[0]) + 1);
+            }
         }
     }
 
     //--------------------------------------------------------------------------
     // Get index of a unsolved row (minimum remaining values heuristics)
+
     private int selectIndex() {
         int curSize, minSize = size + 1;
         int index = -1;
 
         for (int i = 0; i < size; i++) {
-            curSize = board.get(i).size();
-
-            try {
-                assert curSize > 0;
-            } catch (AssertionError error) {
-                System.err.println("Error: fila " + i + " vacia.");
-                throw error;
-            }
+            curSize = queensCount.get(i);
 
             if (curSize > 1 && curSize < minSize) {
                 index = i;
@@ -193,10 +200,37 @@ public class Chess {
 
         return index;
     }
+
     //--------------------------------------------------------------------------
+    // Select all available indices from a row
+
+    private int selectValues(byte[] array, int[] values) {
+        int nvalues = 0;
+
+        for (int i = 0; i < size; i++)
+            if (array[i] != 0)
+                values[nvalues++] = i;
+
+        return nvalues;
+    }
+
+    //--------------------------------------------------------------------------
+    // Get the __only__ value that is set in the array
+
+    private int getValue(byte[] array) {
+        for (int i = 0; i < size; i++)
+            if (array[i] != 0)
+                return i;
+
+        return -1;
+    }
+
+    //--------------------------------------------------------------------------
+
     private final int size;						// Number of queens
     private long nSteps;						// Number of calls to assign()
-    private ArrayList<HashSet<Integer>> board;	// Queens' positions (set of candidate positions)
+    private ArrayList<byte[]> queens;	        // Queens' positions (set of candidate positions)
+    private ArrayList<Integer> queensCount;     // Number of available values
     private ArrayDeque<int[]> discardedPairs;	// Discarded candidates (index-value)
     private ArrayDeque<Integer> discardedCount;	// Number of discards in the last assignation
 }
