@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+mt_srand();
+
 class Chess {
     private $size;
     private $queens;
@@ -18,6 +20,7 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Constructor
+
     public function __construct($size) {
         $this->size = $size;
         $this->queens = array_fill(0, $size, array_fill(0, $size, 1));
@@ -28,6 +31,7 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Solve queens problem
+
     public function solve() {
         $index = $this->selectIndex();
 
@@ -35,8 +39,9 @@ class Chess {
             return true;
 
         $row = $this->queens[$index];
+        $values = $this->selectValues($row);
 
-        foreach ($row as $value => $none) {
+        foreach ($values as $value) {
             if (!$this->assign($index, $value)) {
                 $this->queens[$index] = $row;
                 continue;
@@ -54,6 +59,7 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Get index of a unsolved row (minimum remaining values heuristics)
+
     private function selectIndex() {
         $minSize = $this->size + 1;
         $index = -1;
@@ -72,6 +78,7 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Assign a value to a row and propagate constraints
+
     private function assign($index, $value) {
         $this->queens[$index] = [];
         $this->stackCount[] = 0;
@@ -97,6 +104,7 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Discard candidate values (constraints propagation)
+
     private function discard($index, $value) {
         $row = $this->queens[$index];
 
@@ -133,6 +141,7 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Undo last assignation (restore constraints)
+
     private function restoreLast() {
         $n = array_pop($this->stackCount);
 
@@ -144,18 +153,37 @@ class Chess {
 
     //--------------------------------------------------------------------------
     // Get number of total tries of assignation
+
+    private function selectValues($array) {
+        $values = [];
+        $offset = mt_rand(0, $this->size - 1);
+
+        for ($i = 0; $i < count($array); $i++) {
+            $index = ($offset + $i) % $this->size;
+
+            if (isset($array[$index]))
+                $values[] = $index;
+        }
+
+        return $values;
+    }
+
+    //--------------------------------------------------------------------------
+    // Get number of total tries of assignation
+
     public function steps() {
         return $this->nsteps;
     }
 
     //--------------------------------------------------------------------------
     // Representation of the chessboard
+
     public function __toString() {
         $string = "";
 
         for ($i = 0; $i < $this->size; $i++) {
             $j = $i + 1;
-            $value = array_keys($this->queens[$i])[0];
+            $value = array_keys($this->queens[$i])[0] + 1;
             $string .= "Reina $j: $value\n";
         }
 
