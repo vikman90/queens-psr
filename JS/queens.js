@@ -35,7 +35,7 @@ hrtime = process.hrtime()
 time = parseInt((hrtime[0] + hrtime[1] / 1e9 - time) * 1000)
 
 if (testing)
-    console.log(String(chess.steps()) + "\t" + time)
+    console.log(String(chess.steps()) + "\t" + chess.discards() + "\t" + time)
 else {
     console.log(String(chess))
     console.log("Resuelto en " + chess.steps() + " pasos. Tiempo: " + time + " ms.")

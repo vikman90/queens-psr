@@ -16,6 +16,7 @@ class Chess {
     private $queens;
     private $queensCount;
     private $nsteps;
+    private $ndiscards;
     private $stackDiscarded;
     private $stackCount;
 
@@ -27,6 +28,7 @@ class Chess {
         $this->queens = array_fill(0, $size, array_fill(0, $size, 1));
         $this->queensCount = array_fill(0, $size, $size);
         $this->nsteps = 0;
+        $this->ndiscards = 0;
         $this->stackDiscarded = [];
         $this->stackCount = [];
     }
@@ -115,6 +117,7 @@ class Chess {
         if ($value < 0 or $value >= $this->size or !$this->queens[$index][$value])
             return true;
 
+        $this->ndiscards++;
         $this->queens[$index][$value] = 0;
         $this->queensCount[$index]--;
         $this->stackDiscarded[] = [$index, $value];
@@ -181,6 +184,13 @@ class Chess {
 
     public function steps() {
         return $this->nsteps;
+    }
+
+    //--------------------------------------------------------------------------
+    // Get number of total discards
+
+    public function discards() {
+        return $this->ndiscards;
     }
 
     //--------------------------------------------------------------------------

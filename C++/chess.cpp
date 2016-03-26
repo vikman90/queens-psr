@@ -30,7 +30,7 @@ __attribute__((constructor)) static int auto_rand()
 //------------------------------------------------------------------------------
 // Constructor
 
-Chess::Chess(int _size) : size(_size), nSteps(0), queens(vector< char* >(_size)), queensCount(vector<int>(_size, _size))
+Chess::Chess(int _size) : size(_size), nSteps(0), nDiscards(0), queens(vector< char* >(_size)), queensCount(vector<int>(_size, _size))
 {
 	for (int i = 0; i < _size; i++) {
 		queens[i] = (char*)malloc(_size);
@@ -137,6 +137,7 @@ bool Chess::discard(int index, int value)
     if (value < 0 || value >= size || !queens[index][value])
         return true;
 
+    nDiscards++;
     queens[index][value] = 0;
     queensCount[index]--;
 	discardedPairs.push(Pair {index, value});

@@ -28,6 +28,7 @@ function Chess(size) {
     this.queens = new Array(size)
     this.queensCount = fill(size, size)
     this.nsteps = 0
+    this.ndiscards = 0
     this.stackDiscarded = []
     this.stackCount = []
 
@@ -119,6 +120,7 @@ function Chess(size) {
         if (value < 0 || value >= this.size || !this.queens[index][value])
             return true
 
+        this.ndiscards++
         this.queens[index][value] = 0
         this.queensCount[index]--
         this.stackDiscarded.push([index, value])
@@ -195,10 +197,17 @@ function Chess(size) {
     }
 
     //--------------------------------------------------------------------------
-    // Get number of total tries of assignati
+    // Get number of total tries of assignation
 
     this.steps = function() {
         return this.nsteps
+    }
+    
+    //--------------------------------------------------------------------------
+    // Get number of total discards
+
+    this.discards = function() {
+        return this.ndiscards
     }
 }
 

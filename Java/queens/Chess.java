@@ -25,6 +25,7 @@ public class Chess {
 
         this.size = size;
         this.nSteps = 0;
+        this.nDiscards = 0;
         this.queens = new ArrayList<byte[]>(size);
         this.queensCount = new ArrayList<Integer>(size);
 
@@ -102,6 +103,13 @@ public class Chess {
     }
 
     //--------------------------------------------------------------------------
+    // Get number of total discards
+
+    public long getDiscards() {
+        return nDiscards;
+    }
+
+    //--------------------------------------------------------------------------
     // Assign a value to a row and propagate constraints
 
     private boolean assign(int index, int value) {
@@ -138,6 +146,7 @@ public class Chess {
         if (value < 0 || value >= size || queens.get(index)[value] == 0)
             return true;
 
+        nDiscards++;
         queens.get(index)[value] = 0;
         count = queensCount.get(index) - 1;
         queensCount.set(index, count);
@@ -236,6 +245,7 @@ public class Chess {
 
     private final int size;						// Number of queens
     private long nSteps;						// Number of calls to assign()
+    private long nDiscards;						// Number of calls to discard()
     private ArrayList<byte[]> queens;	        // Queens' positions (set of candidate positions)
     private ArrayList<Integer> queensCount;     // Number of available values
     private ArrayDeque<int[]> discardedPairs;	// Discarded candidates (index-value)

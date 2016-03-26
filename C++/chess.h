@@ -43,6 +43,12 @@ public:
 		return nSteps;
 	}
 
+    // Get number of total discards
+	inline long long getDiscards()
+	{
+		return nDiscards;
+	}
+
 private:
 
 	// Assign a value to a row and propagate constraints
@@ -64,7 +70,8 @@ private:
     int getValue(const char *array) const;
 
 	int size;                           // Number of queens
-	long long nSteps;                   // Number of calls to Assign()
+	long long nSteps;                   // Number of calls to assign()
+    long long nDiscards;                // Number of calls to discard()
 	std::vector< char* > queens;        // Queens' positions (set of candidate positions)
     std::vector<int> queensCount;       // Number of available values
 	std::stack<Pair> discardedPairs;    // Discarded candidates (index-value)

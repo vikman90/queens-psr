@@ -7,7 +7,7 @@
  * February 8, 2013
  *
  * Syntax: ./queens [-test] [N]
- * 
+ *
  ******************************************************************************/
 
 #include <iostream>
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 	int milliseconds;
 	int n = 0;
 	bool testing = false;
-	
+
 	for (int i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], "-test"))
 			testing = true;
@@ -44,14 +44,14 @@ int main(int argc, char **argv) {
 	milliseconds = (int)((double)(clock() - ticks) / CLOCKS_PER_SEC * 1000);
 
 	if (testing) {
-		cout << chess->getSteps() << "\t" << milliseconds << endl;
+		cout << chess->getSteps() << "\t" << chess->getDiscards() << "\t" << milliseconds << endl;
 	}
 	else {
 		cout << *chess << endl;
 		cout << "Resuelto en " << chess->getSteps() << " pasos. ";
 		cout << "Tiempo: " << milliseconds << " ms.\n";
 	}
-	
+
 	delete chess;
 	return EXIT_SUCCESS;
 }

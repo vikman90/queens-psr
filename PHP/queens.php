@@ -36,9 +36,10 @@ $time = microtime(true);
 $chess->solve();
 $time = (int)((microtime(true) - $time) * 1000);
 $steps = $chess->steps();
+$discards = $chess->discards();
 
 if ($testing)
-    echo "$steps\t$time\n";
+    echo "$steps\t$discards\t$time\n";
 else {
     echo $chess;
     echo "Resuelto en $steps pasos. Tiempo: $time ms.\n";

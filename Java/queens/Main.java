@@ -47,7 +47,7 @@ public class Main {
         time = System.currentTimeMillis() - time;
 
         if (testing) {
-            System.out.println(chess.getSteps() + "\t" + time);
+            System.out.println(chess.getSteps() + "\t" + chess.getDiscards() + "\t" + time);
         } else {
             System.out.println(chess);
             System.out.print("Resuelto en " + chess.getSteps() + " pasos. ");

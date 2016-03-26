@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 ################################################################################
 # N queens problem (Python version)
 # Class Chess
@@ -41,6 +40,6 @@ if __name__ == "__main__":
     time = int((clock() - time) * 1000)
 
     if testing:
-        print(str(chess.steps()) + "\t" + str(time));
+        print(str(chess.steps()) + "\t" + str(chess.discards()) + "\t" + str(time));
     else:
         print("Resuelto en", chess.steps(), "pasos. Tiempo:", time, "ms.")

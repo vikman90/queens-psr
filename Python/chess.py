@@ -20,11 +20,12 @@ class Chess:
         '''Constructor'''
 
         self._size = size               # Number of queens
-        # Calls to assign()
+        # Queens' positions (candidates)
         self._queens = [[1 for j in range(size)] for i in range(size)]
         # Number of available values in each row
         self._queensCount = [size for i in range(size)]
-        self._nsteps = 0                # Queens' positions (candidates)
+        self._nsteps = 0                # Calls to assign()
+        self._ndiscards = 0             # Calls to discard()
         self._stackDiscarded = list()   # Discarded candidates (index-value)
         self._stackCount = list()       # Discards in the last assignation
 
@@ -98,6 +99,7 @@ class Chess:
         if value < 0 or value >= self._size or not self._queens[index][value]:
             return True
 
+        self._ndiscards += 1
         self._queens[index][value] = 0
         self._queensCount[index] -= 1
         self._stackDiscarded.append([index, value])
@@ -138,6 +140,11 @@ class Chess:
         '''Get number of total tries of assignation'''
 
         return self._nsteps
+        
+    def discards(self):
+        '''Get number of total discards'''
+        
+        return self._ndiscards
 
     def selectValues(self, row):
         '''Select all available indices from a row'''
