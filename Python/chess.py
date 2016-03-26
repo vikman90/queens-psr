@@ -11,6 +11,9 @@
 from copy import copy
 from time import clock
 from sys import argv
+from random import seed, randint
+
+seed()
 
 class Chess:
     def __init__(self, size):
@@ -126,7 +129,7 @@ class Chess:
 
         for i in range(count):
             pair = self._stackDiscarded.pop()
-            
+
             if not self._queens[pair[0]][pair[1]]:
                 self._queens[pair[0]][pair[1]] = 1
                 self._queensCount[pair[0]] += 1
@@ -140,10 +143,13 @@ class Chess:
         '''Select all available indices from a row'''
 
         values = []
+        offset = randint(0, self._size - 1)
 
         for i in range(len(row)):
-            if row[i]:
-                values.append(i)
+            index = (offset + i) % self._size
+
+            if row[index]:
+                values.append(index)
 
         return values
 
