@@ -13,6 +13,7 @@ package queens;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 public class Chess {
 
@@ -36,6 +37,7 @@ public class Chess {
 
         this.discardedPairs = new ArrayDeque<int[]>();
         this.discardedCount = new ArrayDeque<Integer>();
+        this.random = new Random();
     }
 
     //--------------------------------------------------------------------------
@@ -206,10 +208,15 @@ public class Chess {
 
     private int selectValues(byte[] array, int[] values) {
         int nvalues = 0;
+        int index;
+        int offset = random.nextInt(size);
 
-        for (int i = 0; i < size; i++)
-            if (array[i] != 0)
-                values[nvalues++] = i;
+        for (int i = 0; i < size; i++) {
+            index = (offset + i) % size;
+
+            if (array[index] != 0)
+                values[nvalues++] = index;
+        }
 
         return nvalues;
     }
@@ -233,4 +240,5 @@ public class Chess {
     private ArrayList<Integer> queensCount;     // Number of available values
     private ArrayDeque<int[]> discardedPairs;	// Discarded candidates (index-value)
     private ArrayDeque<Integer> discardedCount;	// Number of discards in the last assignation
+    private Random random;                      // Generator of random numbers
 }
