@@ -86,7 +86,7 @@ public class Chess {
             if (queensCount.get(i) != 1)
                 builder.append("Fila " + (i + 1) + " no resuelta.\n");
             else    {
-                int value = getValue(queens.get(i));
+                int value = getValue(i);
                 builder.append("Reina " + (i + 1) + ": casilla " + (value + 1) + "\n");
             }
         }
@@ -148,7 +148,7 @@ public class Chess {
             return false;
 
         if (count == 1) {
-            value = getValue(queens.get(index));
+            value = getValue(index);
 
             for (int i = 0; i < size; i++) {
                 if (i == index) {
@@ -222,11 +222,11 @@ public class Chess {
     }
 
     //--------------------------------------------------------------------------
-    // Get the __only__ value that is set in the array
+    // Get the __only__ value that is set in the indexed row
 
-    private int getValue(byte[] array) {
+    private int getValue(int index) {
         for (int i = 0; i < size; i++)
-            if (array[i] != 0)
+            if (queens.get(index)[i] != 0)
                 return i;
 
         return -1;

@@ -123,7 +123,6 @@ class Chess {
         if ($this->queensCount[$index] == 0)
             return false;
 
-
         if ($this->queensCount[$index] == 1) {
             $value = array_search(1, $this->queens[$index]);
 
@@ -161,7 +160,7 @@ class Chess {
     }
 
     //--------------------------------------------------------------------------
-    // Get number of total tries of assignation
+    // Select all available indices from a row
 
     private function selectValues($array) {
         $values = [];
