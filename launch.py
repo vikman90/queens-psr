@@ -34,7 +34,11 @@ if __name__ == '__main__':
     nsuccess = 0
     ntotal = 0
     nsteps = 0
+    ndiscards = 0
     nmillis = 0
+    maxsteps = 0
+    maxdiscards = 0
+    maxmillis = 0
     time = clock()
 
     for n in range(step, stop + 1, step):
@@ -49,7 +53,14 @@ if __name__ == '__main__':
             nsuccess += 1
             data = output.split()
             nsteps += int(data[0])
-            nmillis += int(data[1])
+            ndiscards += int(data[1])
+            nmillis += int(data[2])
+
+            if ndiscards > maxdiscards:
+                maxsteps = nsteps
+                maxdiscards = ndiscards
+                maxmillis = nmillis
+                
         except TimeoutExpired:
             fileout.write(str(n) + '\n')
             print(str(n) + ': tiempo agotado.')
@@ -58,7 +69,11 @@ if __name__ == '__main__':
     fileout.close()
 
     print('\n\tResultado:')
-    print(str(nsuccess) + '/' + str(ntotal), 'problemas resueltos.')
-    print('Total:', nsteps, 'pasos en', nmillis, 'ms.')
-    print('Media:', nsteps / nsuccess, 'pasos y', nmillis, 'ms.')
-    print('Tiempo de ejecucion:', time, 'seg.')
+    print('{} / {} problemas resueltos'.format(nsuccess, ntotal))
+    print('Total: {} pasos, {} descartes, {} ms.'.format(
+        nsteps, ndiscards, nmillis))
+    print('Media: {} pasos, {} descartes, {} ms.'.format(
+        nsteps // nsuccess, ndiscards // nsuccess, nmillis // nsuccess))
+    print('Eficiencia maxima: {} pasos/ms, {} descartes/ms.'.format(
+        maxsteps // maxmillis, maxdiscards // maxmillis))
+    print('Tiempo de ejecucion (launcher): {} seg.'.format(time))
