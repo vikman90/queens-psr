@@ -21,10 +21,12 @@ using namespace std;
 
 // TODO: Test with Visual Studio
 
-__attribute__((constructor)) static int auto_rand()
+#ifndef WIN32
+__attribute__((constructor)) 
+#endif
+static void auto_rand()
 {
-    srand(time(NULL));
-    return 0;
+    srand((unsigned int)time(NULL));
 }
 
 //------------------------------------------------------------------------------
@@ -32,6 +34,10 @@ __attribute__((constructor)) static int auto_rand()
 
 Chess::Chess(int _size) : size(_size), nSteps(0), nDiscards(0), queens(vector< char* >(_size)), queensCount(vector<int>(_size, _size))
 {
+#ifdef WIN32
+	auto_rand();
+#endif
+
 	for (int i = 0; i < _size; i++) {
 		queens[i] = (char*)malloc(_size);
         memset(queens[i], 1, _size);
@@ -52,13 +58,19 @@ Chess::~Chess()
 
 bool Chess::solve()
 {
+	int nvalues;
 	int index = selectIndex();
-	char currentSet[size];
-    int values[size];
-    int nvalues;
 
 	if (index == -1)
 		return true;
+
+#ifdef WIN32
+	char *currentSet = (char*)malloc(size);
+	int *values = (int*)malloc(size * sizeof(int));
+#else
+	char currentSet[size];
+    int values[size];
+#endif
 
 	memcpy(currentSet, queens[index], size);
     nvalues = selectValues(currentSet, values);
@@ -72,13 +84,23 @@ bool Chess::solve()
 			continue;
 		}
 
-		if (solve())
+		if (solve()) {
+#ifdef WIN32
+			free(currentSet);
+			free(values);
+#endif
 			return true;
+		}
 
 		restoreLast();
         memcpy(queens[index], currentSet, size);
         queensCount[index] = nvalues;
 	}
+
+#ifdef WIN32
+	free(currentSet);
+	free(values);
+#endif
 
 	return false;
 }

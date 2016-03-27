@@ -46,6 +46,7 @@ C#/obj
 C#/.vs
 C++/Release
 C++/x64
+C++/.vs
 
 Java/**/*.class
 Java/*.jar
