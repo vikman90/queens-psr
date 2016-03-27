@@ -27,7 +27,7 @@ namespace Queens
                 if (arg == "-test")
                     testing = true;
                 else
-                    n = int.Parse(args[0]);
+                    n = int.Parse(arg);
             }
 
             while (n < 4)
@@ -42,7 +42,7 @@ namespace Queens
             time = DateTime.Now.Ticks - time;
 
             if (testing)
-                Console.WriteLine(chess.Steps + "\t" + time / 10000);
+                Console.WriteLine(chess.Steps + "\t" + chess.Discards + "\t" + time / 10000);
             else
             {
                 Console.WriteLine(chess.ToString());

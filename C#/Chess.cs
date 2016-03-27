@@ -8,6 +8,7 @@
  * 
  ******************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,17 +22,20 @@ namespace Queens
 
         public Chess(int size)
         {
-            IEnumerable<int> completeSet = Enumerable.Range(0, size);
+            byte[] completeSet = Enumerable.Repeat((byte)1, size).ToArray();
 
             this.size = size;
-            this.nSteps = 0;
-            this.board = new HashSet<int>[size];
+            nSteps = 0;
+            nDiscards = 0;
+            queens = new byte[size][];
+            queensCount = Enumerable.Repeat(size, size).ToArray();
 
             for (int i = 0; i < size; i++)
-                this.board[i] = new HashSet<int>(completeSet);
+                this.queens[i] = (byte[])completeSet.Clone();
 
-            this.discardedPairs = new Stack<int[]>();
-            this.discardedCount = new Stack<int>();
+            discardedPairs = new Stack<int[]>();
+            discardedCount = new Stack<int>();
+            random = new Random();
         }
 
         //----------------------------------------------------------------------
@@ -40,19 +44,24 @@ namespace Queens
         public bool Solve()
         {
             int index = SelectIndex();
-            HashSet<int> currentSet;
+            int nvalues;
+            byte[] currentSet;
+            int[] values = new int[size];
 
             if (index == -1)
                 return true;
 
-            currentSet = board[index];
-            board[index] = new HashSet<int>(currentSet);
+            currentSet = (byte[])queens[index].Clone();
+            nvalues = SelectValues(index, values);
 
-            foreach (int value in currentSet) 
+            for (int i = 0; i < nvalues; i++) 
             {
+                int value = values[i];
+
                 if (!Assign(index, value))
                 {
-                    board[index] = new HashSet<int>(currentSet);
+                    queens[index] = (byte[])currentSet.Clone();
+                    queensCount[index] = nvalues;
                     continue;
                 }
 
@@ -60,7 +69,8 @@ namespace Queens
                     return true;
 
                 RestoreLast();
-                board[index] = new HashSet<int>(currentSet);
+                queens[index] = (byte[])currentSet.Clone();
+                queensCount[index] = nvalues;
             }
 
             return false;
@@ -74,7 +84,10 @@ namespace Queens
             StringBuilder builder = new StringBuilder();
 
             for (int i = 0; i < size; i++)
-                builder.Append("Fila " + (i + 1) + " - columna " + (board[i].Single() + 1) + "\n");
+                if (queensCount[i] != 1)
+                    builder.Append("Reina " + (i + 1) + " no resuelta.\n");
+                else
+                    builder.Append("Reina " + (i + 1) + ": casilla " + (Array.IndexOf(queens[i], (byte)1) + 1) + "\n");
 
             return builder.ToString();
         }
@@ -91,11 +104,23 @@ namespace Queens
         }
 
         //----------------------------------------------------------------------
+        // Get number of total discards
+
+        public long Discards
+        {
+            get
+            {
+                return nDiscards;
+            }
+        }
+
+        //----------------------------------------------------------------------
         // Assign a value to a row and propagate constraints
 
         private bool Assign(int index, int value)
         {
-            board[index].Clear();
+            Array.Clear(queens[index], 0, size);
+            queensCount[index] = 0;
             discardedCount.Push(0);
             nSteps++;
 
@@ -114,7 +139,8 @@ namespace Queens
                 }
             }
 
-            board[index].Add(value);
+            queens[index][value] = 1;
+            queensCount[index] = 1;
             return true;
         }
 
@@ -123,18 +149,21 @@ namespace Queens
 
         private bool Discard(int index, int value)
         {
-            if (!board[index].Remove(value))
+            if (value < 0 || value >= size || queens[index][value] == 0)
                 return true;
 
+            nDiscards++;
+            queens[index][value] = 0;
+            queensCount[index]--;
             discardedPairs.Push(new int[] {index, value});
             discardedCount.Push(discardedCount.Pop() + 1);
 
-            if (board[index].Count == 0)
+            if (queensCount[index] == 0)
                 return false;
 
-            if (board[index].Count == 1)
+            if (queensCount[index] == 1)
             {
-                value = board[index].Single();
+                value = Array.IndexOf(queens[index], (byte)1);
 
                 for (int i = 0; i < size; i++)
                 {
@@ -162,7 +191,12 @@ namespace Queens
             for (int i = 0; i < n; i++)
             {
                 int[] pair = discardedPairs.Pop();
-                board[pair[0]].Add(pair[1]);
+                
+                if (queens[pair[0]][pair[1]] == 0)
+                {
+                    queens[pair[0]][pair[1]] = 1;
+                    queensCount[pair[0]]++;
+                }
             }
         }
 
@@ -171,17 +205,15 @@ namespace Queens
 
         private int SelectIndex()
         {
-            int curCount, minCount = size + 1;
+            int minCount = size + 1;
             int index = -1;
 
             for (int i = 0; i < size; i++)
             {
-                curCount = board[i].Count;
-
-                if (curCount > 1 && curCount < minCount)
+                if (queensCount[i] > 1 && queensCount[i] < minCount)
                 {
                     index = i;
-                    minCount = curCount;
+                    minCount = queensCount[i];
                 }
             }
 
@@ -189,11 +221,33 @@ namespace Queens
         }
 
         //----------------------------------------------------------------------
+        // Select all available indices from a row
+
+        private int SelectValues(int index, int[] values)
+        {
+            int nvalues = 0;
+            int offset = random.Next(size);
+
+            for (int i = 0; i < size; i++)
+            {
+                int value = (offset + i) % size;
+
+                if (queens[index][value] != 0)
+                    values[nvalues++] = value;
+            }
+
+            return nvalues;
+        }
+
+        //----------------------------------------------------------------------
 
         readonly int size;                      // Number of queens
         private long nSteps;                    // Number of calls to Assign()
-        private HashSet<int>[] board;           // Queens' positions (set of candidate positions)
+        private long nDiscards;                 // Number of calls to Discard()
+        private byte[][] queens;                // Queens' positions (set of candidate positions)
+        private int[] queensCount;              // Number of available values
         private Stack<int[]> discardedPairs;    // Discarded candidates (index-value)
         private Stack<int> discardedCount;      // Number of discards in the last assignation
+        private Random random;                  // Generator of random numbers
     }
 }
