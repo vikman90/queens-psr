@@ -140,10 +140,10 @@ class Chess:
         '''Get number of total tries of assignation'''
 
         return self._nsteps
-        
+
     def discards(self):
         '''Get number of total discards'''
-        
+
         return self._ndiscards
 
     def selectValues(self, row):
@@ -175,8 +175,10 @@ class Chess:
         string = str()
 
         for i in range(self._size):
-            value = self._queens[i].pop()
-            self._queens[i].add(value)
-            string += "Reina " + str(i + 1) + ": " + str(value + 1) + "\n"
+            if self._queensCount[i] == 0:
+                string += "Queen " + str(i + 1) + " not solved.\n"
+            else:
+                value = self._queens[i][0] + 1
+                string += "Queen " + str(i + 1) + ": square " + str(value) + "\n"
 
         return string[:-1]

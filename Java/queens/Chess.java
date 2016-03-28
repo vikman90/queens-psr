@@ -85,10 +85,10 @@ public class Chess {
 
         for (int i = 0; i < size; i++) {
             if (queensCount.get(i) != 1)
-                builder.append("Fila " + (i + 1) + " no resuelta.\n");
+                builder.append("Queen " + (i + 1) + " not solved.\n");
             else    {
                 int value = getValue(i);
-                builder.append("Reina " + (i + 1) + ": casilla " + (value + 1) + "\n");
+                builder.append("Queen " + (i + 1) + ": square " + (value + 1) + "\n");
             }
         }
 

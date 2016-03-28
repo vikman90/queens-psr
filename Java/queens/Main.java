@@ -32,7 +32,7 @@ public class Main {
 
         while (n < 4) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("Introduzca cantidad de reinas: ");
+            System.out.print("Enter number of queens: ");
 
             try {
                 n = Integer.parseInt(reader.readLine());
@@ -50,8 +50,8 @@ public class Main {
             System.out.println(chess.getSteps() + "\t" + chess.getDiscards() + "\t" + time);
         } else {
             System.out.println(chess);
-            System.out.print("Resuelto en " + chess.getSteps() + " pasos. ");
-            System.out.println("Tiempo: " + time + " ms.");
+            System.out.print("Solved in " + chess.getSteps() + " steps. ");
+            System.out.println("Time: " + time + " ms.");
         }
     }
 }

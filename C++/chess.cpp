@@ -112,11 +112,11 @@ ostream& operator<< (ostream &stream, const Chess &chess)
 {
 	for (int i = 0; i < chess.size; i++) {
 		if (chess.queensCount[i] != 1)
-			stream << "Reina " << i + 1 << " no resuelta.\n";
+			stream << "Queen " << i + 1 << " not solved.\n";
 
 		else {
 			int value = chess.getValue(chess.queens[i]);
-			stream << "Reina " << (i + 1) << ": casilla " << (value + 1) << endl;
+			stream << "Queen " << (i + 1) << ": square " << (value + 1) << endl;
 		}
 	}
 

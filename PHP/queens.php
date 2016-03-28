@@ -29,7 +29,7 @@ foreach ($argv as $a) {
 }
 
 while ($n < 4)
-    $n = (int)readline("Indique cantidad de reinas: ");
+    $n = (int)readline("Enter number of queens: ");
 
 $chess = new Chess($n);
 $time = microtime(true);
@@ -42,5 +42,5 @@ if ($testing)
     echo "$steps\t$discards\t$time\n";
 else {
     echo $chess;
-    echo "Resuelto en $steps pasos. Tiempo: $time ms.\n";
+    echo "Solved in $steps steps. Time: $time ms.\n";
 }

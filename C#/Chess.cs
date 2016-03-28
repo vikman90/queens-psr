@@ -85,9 +85,9 @@ namespace Queens
 
             for (int i = 0; i < size; i++)
                 if (queensCount[i] != 1)
-                    builder.Append("Reina " + (i + 1) + " no resuelta.\n");
+                    builder.Append("Queen " + (i + 1) + " not solved.\n");
                 else
-                    builder.Append("Reina " + (i + 1) + ": casilla " + (Array.IndexOf(queens[i], (byte)1) + 1) + "\n");
+                    builder.Append("Queen " + (i + 1) + ": square " + (Array.IndexOf(queens[i], (byte)1) + 1) + "\n");
 
             return builder.ToString();
         }

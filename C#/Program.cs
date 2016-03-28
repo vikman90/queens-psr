@@ -32,7 +32,7 @@ namespace Queens
 
             while (n < 4)
             {
-                Console.Write("Introduzca cantidad de reinas: ");
+                Console.Write("Enter number of queens: ");
                 n = int.Parse(Console.ReadLine());
             }
 
@@ -46,8 +46,8 @@ namespace Queens
             else
             {
                 Console.WriteLine(chess.ToString());
-                Console.Write("Resuelto en " + chess.Steps + " pasos. ");
-                Console.WriteLine("Tiempo: " + time / 10000 + " ms.");
+                Console.Write("Solved in " + chess.Steps + " steps. ");
+                Console.WriteLine("Time: " + time / 10000 + " ms.");
             }
         }
     }

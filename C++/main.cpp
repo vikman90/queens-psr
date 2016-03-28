@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	}
 
 	while (n < 4) {
-		cout << "Indique cantidad de reinas: ";
+		cout << "Enter number of queens: ";
 		cin >> n;
 	}
 
@@ -48,8 +48,8 @@ int main(int argc, char **argv) {
 	}
 	else {
 		cout << *chess << endl;
-		cout << "Resuelto en " << chess->getSteps() << " pasos. ";
-		cout << "Tiempo: " << milliseconds << " ms.\n";
+		cout << "Solved in " << chess->getSteps() << " steps. ";
+		cout << "Time: " << milliseconds << " ms.\n";
 	}
 
 	delete chess;

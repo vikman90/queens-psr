@@ -38,5 +38,5 @@ if (testing)
     console.log(String(chess.steps()) + "\t" + chess.discards() + "\t" + time)
 else {
     console.log(String(chess))
-    console.log("Resuelto en " + chess.steps() + " pasos. Tiempo: " + time + " ms.")
+    console.log("Solved in " + chess.steps() + " steps. Time: " + time + " ms.")
 }

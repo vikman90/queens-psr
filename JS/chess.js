@@ -188,9 +188,9 @@ function Chess(size) {
 
         for (var i = 0; i < this.size; i++) {
             if (this.queensCount[i] != 1)
-                string += "Reina " + (i + 1) + " no resuelta\n"
+                string += "Queen " + (i + 1) + " not solved\n"
             else
-                string += "Reina " + (i + 1) + ": " + (this.queens[i].indexOf(1) + 1) + "\n"
+                string += "Queen " + (i + 1) + ": square " + (this.queens[i].indexOf(1) + 1) + "\n"
         }
 
         return string

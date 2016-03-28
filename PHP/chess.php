@@ -203,10 +203,10 @@ class Chess {
             $j = $i + 1;
 
             if ($this->queensCount[$i] != 1)
-                $string .= "Reina $j no resuelta\n";
+                $string .= "Queen $j not solved\n";
             else {
                 $value = array_search(1, $this->queens[$i]) + 1;
-                $string .= "Reina $j: $value\n";
+                $string .= "Queen $j: square $value\n";
             }
         }
 

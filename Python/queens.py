@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     while n < 4:
         try:
-            n = int(input("Indique cantidad de reinas: "))
+            n = int(input("Enter number of queens: "))
         except ValueError:
             n = 0
             
@@ -42,4 +42,5 @@ if __name__ == "__main__":
     if testing:
         print(str(chess.steps()) + "\t" + str(chess.discards()) + "\t" + str(time));
     else:
-        print("Resuelto en", chess.steps(), "pasos. Tiempo:", time, "ms.")
+        print(chess)
+        print("Solved in", chess.steps(), "steps. Time:", time, "ms.")

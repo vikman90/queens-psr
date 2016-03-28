@@ -22,7 +22,7 @@ from subprocess import check_output, TimeoutExpired, CalledProcessError
 
 if __name__ == '__main__':
     if len(argv) < 5:
-        print('Uso', argv[0], '<salto> <max> <tiempo> <intentos> <programa>')
+        print('Uso', argv[0], '<step> <stop> <secs> <tries> <program>')
         exit(1)
 
     step = int(argv[1])
@@ -76,11 +76,11 @@ if __name__ == '__main__':
                     break
 
                 except TimeoutExpired:
-                    print(str(n) + ': tiempo agotado.')
+                    print(str(n) + ': timeout.')
                     continue
 
                 except CalledProcessError:
-                    print(str(n) + ': error del programa.')
+                    print(str(n) + ': program error.')
                     continue
 
             if not nsteps:
@@ -92,15 +92,15 @@ if __name__ == '__main__':
     time = clock() - time
     fileout.close()
 
-    print('\n\tResultado:')
-    print('{} / {} problemas resueltos'.format(nsuccess, ntotal))
-    print('Total: {} pasos, {} descartes, {} ms.'.format( \
+    print('\n\tResults:')
+    print('{} / {} programs solved'.format(nsuccess, ntotal))
+    print('Total: {} steps, {} discards, {} ms.'.format( \
         nsteps, ndiscards, nmillis))
-    print('Media: {} pasos, {} descartes, {} ms.'.format( \
+    print('Mean: {} steps, {} discards, {} ms.'.format( \
         round(sumsteps / nsuccess), round(sumdiscards / nsuccess), \
         round(summillis / nsuccess)))
-    print("Maximo: {} pasos, {} descartes, {} ms.".format( \
+    print("Maximum: {} steps, {} discards, {} ms.".format( \
         maxsteps, maxdiscards, maxmillis))
-    print('Eficiencia: {} pasos/ms, {} descartes/ms.'.format( \
+    print('Performance: {} steps/ms, {} discards/ms.'.format( \
         round(maxsteps / maxmillis), round(maxdiscards / maxmillis)))
-    print('Tiempo de ejecucion (launcher): {} seg.'.format(time))
+    print('Runtime (launcher): {} sec.'.format(time))
