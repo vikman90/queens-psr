@@ -18,7 +18,7 @@
 
 from sys import argv
 from time import clock
-from subprocess import check_output, TimeoutExpired
+from subprocess import check_output, TimeoutExpired, CalledProcessError
 
 if __name__ == '__main__':
     if len(argv) < 5:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                 nsteps = 0
                 ndiscards = 0
                 nmillis = 0
-                
+
                 try:
                     output = check_output(program + ['-test', str(n)], \
                                           timeout = timemax).decode()
@@ -66,10 +66,10 @@ if __name__ == '__main__':
 
                     if nsteps > maxsteps:
                         maxsteps = nsteps
-                        
+
                     if ndiscards > maxdiscards:
                         maxdiscards = ndiscards
-                        
+
                     if nmillis > maxmillis:
                         maxmillis = nmillis
 
@@ -77,6 +77,10 @@ if __name__ == '__main__':
 
                 except TimeoutExpired:
                     print(str(n) + ': tiempo agotado.')
+                    continue
+
+                except CalledProcessError:
+                    print(str(n) + ': error del programa.')
                     continue
 
             if not nsteps:
