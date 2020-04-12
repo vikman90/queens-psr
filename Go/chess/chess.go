@@ -3,7 +3,6 @@
 
 package chess
 
-// import "container/list"
 import "fmt"
 
 type chess struct {
@@ -101,7 +100,7 @@ func (chess *chess) discard(index, value int) bool {
 		return false
 
 	case 1:
-		value := queen.getValues()[0]
+		value := queen.findValue()
 
 		if !chess.restrict(index, value) {
 			return false
@@ -140,14 +139,12 @@ func (chess *chess) selectIndex() int {
 
 func (chess *chess) Print() {
 	for i, q := range chess.queens {
-		values := q.getValues()
-
-		switch len(values) {
+		switch q.count {
 		case 0:
 			fmt.Printf("[%d] (invalid)\n", i)
 
 		case 1:
-			fmt.Printf("[%d] %d\n", i, values[0])
+			fmt.Printf("[%d] %d\n", i, q.findValue())
 
 		default:
 			fmt.Printf("[%d] (unsolved)\n", i)

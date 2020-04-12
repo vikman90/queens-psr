@@ -65,3 +65,17 @@ func (queen *queen) unsetValue(value int) {
 	queen.positions[value] = false
 	queen.count--
 }
+
+func (queen *queen) findValue() int {
+	if queen.count != 1 {
+		return -1
+	}
+
+	for i, v := range queen.positions {
+		if v {
+			return i
+		}
+	}
+
+	return -1
+}
