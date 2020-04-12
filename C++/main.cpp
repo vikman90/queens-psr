@@ -21,7 +21,7 @@ using namespace std;
 int main(int argc, char **argv) {
 	Chess *chess;
 	clock_t ticks;
-	int milliseconds;
+	long microseconds;
 	int n = 0;
 	bool testing = false;
 
@@ -41,15 +41,18 @@ int main(int argc, char **argv) {
 	chess = new Chess(n);
 	ticks = clock();
 	chess->solve();
-	milliseconds = (int)((double)(clock() - ticks) / CLOCKS_PER_SEC * 1000);
+	microseconds = (long)((double)(clock() - ticks) / CLOCKS_PER_SEC * 1000000);
 
 	if (testing) {
-		cout << chess->getSteps() << "\t" << chess->getDiscards() << "\t" << milliseconds << endl;
+		cout << chess->getSteps() << "\t" << chess->getDiscards() << "\t" << microseconds << endl;
 	}
 	else {
 		cout << *chess << endl;
-		cout << "Solved in " << chess->getSteps() << " steps. ";
-		cout << "Time: " << milliseconds << " ms.\n";
+		cerr << "Steps:       " << chess->getSteps() << endl;
+		cerr << "Discards:    " << chess->getDiscards() << endl;
+		cerr << "Time:        " << microseconds / 1000.0 << " ms." << endl;
+		cerr << "Performance: " << chess->getSteps() * 1000 / microseconds << " steps/ms." << endl;
+		cerr << "             " << chess->getDiscards() * 1000 / microseconds << " discards/ms." << endl;
 	}
 
 	delete chess;
