@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"./chess"
+	"queens/chess"
 )
 
 func main() {

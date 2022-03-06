@@ -52,6 +52,7 @@ Java/**/*.class
 Java/*.jar
 C++/queens
 Python/__pycache__
+Go/queens
 
 output.txt
 .vscode
