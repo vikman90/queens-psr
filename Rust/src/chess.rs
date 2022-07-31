@@ -15,9 +15,7 @@ pub struct Chess {
     /// Number of available values.
     queens_count: Vec<usize>,
     /// Discarded candidates (index-value).
-    discarded_pairs: Vec<(usize, usize)>,
-    /// Number of discards in the last assignation.
-    discarded_count: Vec<u32>,
+    discarded_pairs: Vec<Vec<(usize, usize)>>,
 }
 
 impl Chess {
@@ -29,7 +27,6 @@ impl Chess {
             queens: vec![vec![true; size]; size],
             queens_count: vec![size; size],
             discarded_pairs: Vec::new(),
-            discarded_count: Vec::new()
         }
     }
 
@@ -76,7 +73,7 @@ impl Chess {
     fn assign(&mut self, index: usize, value: usize) -> bool {
         self.trial_ops += 1;
         self.clear_row(index);
-        self.discarded_count.push(0);
+        self.discarded_pairs.push(Vec::new());
 
         if !self.propagate(index, value) {
             self.restore_last();
@@ -98,10 +95,7 @@ impl Chess {
         }
 
         self.discard_ops += 1;
-        self.discarded_pairs.push((index, value));
-
-        let count = self.discarded_count.pop().unwrap();
-        self.discarded_count.push(count + 1);
+        self.discarded_pairs.last_mut().unwrap().push((index,value));
 
         if self.queens_count[index] == 0 {
             return false;
@@ -116,10 +110,9 @@ impl Chess {
 
     /// Undo last assignation (restore constraints).
     fn restore_last(&mut self) {
-        let count = self.discarded_count.pop().unwrap();
+        let pairs = self.discarded_pairs.pop().unwrap();
 
-        for _ in 0..count {
-            let (index, value) = self.discarded_pairs.pop().unwrap();
+        for (index, value) in pairs {
             self.push_candidate(index, value);
         }
     }
