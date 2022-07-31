@@ -3,25 +3,28 @@
 // July 31, 2022
 
 mod chess;
+mod solver;
 
 use std::env;
 use std::process::exit;
 use std::time::{Instant,Duration};
 use chess::Chess;
+use solver::Solver;
 
 const DEFAULT_SIZE: usize = 100;
 
 fn main() {
     let size = parse_args();
-    let mut chess = Chess::new(size);
+    let chess = Chess::new(size);
+    let mut solver = Solver::new(chess);
 
     let now = Instant::now();
 
-    if !chess.solve() {
+    if !solver.solve() {
         panic!("Cannot resolve the problem");
     }
 
-    print_results(&chess, now.elapsed());
+    print_results(&solver, now.elapsed());
 
 }
 
@@ -42,11 +45,11 @@ fn parse_args() -> usize {
 }
 
 /// Print algorithm results into stdout and stderr.
-fn print_results(chess: &Chess, duration: Duration) {
-    print!("{}", chess);
-    eprintln!("Trials:      {}", chess.trials());
-    eprintln!("Discards:    {}", chess.discards());
+fn print_results(solver: &Solver, duration: Duration) {
+    print!("{}", solver.chess());
+    eprintln!("Trials:      {}", solver.trials());
+    eprintln!("Discards:    {}", solver.discards());
     eprintln!("Time:        {:.3} ms.", duration.as_millis());
-    eprintln!("Performance: {:.3} steps/μs.", chess.trials() as f64 / duration.as_micros() as f64);
-    eprintln!("             {:.3} discards/μs.", chess.discards() as f64 / duration.as_micros() as f64);
+    eprintln!("Performance: {:.3} steps/μs.", solver.trials() as f64 / duration.as_micros() as f64);
+    eprintln!("             {:.3} discards/μs.", solver.discards() as f64 / duration.as_micros() as f64);
 }
