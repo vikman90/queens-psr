@@ -3,7 +3,7 @@
 // July 31, 2022
 
 use std::fmt;
-use std::collections::HashSet;
+use rand::{thread_rng, seq::SliceRandom};
 
 pub struct Chess {
     /// Number of calls to assign().
@@ -11,7 +11,9 @@ pub struct Chess {
     /// Number of calls to discard().
     discard_ops: u64,
     /// Queens' positions (set of candidate positions).
-    queens: Vec<HashSet<usize>>,
+    queens: Vec<Vec<bool>>,
+    /// Number of available values.
+    queens_count: Vec<usize>,
     /// Discarded candidates (index-value).
     discarded_pairs: Vec<(usize, usize)>,
     /// Number of discards in the last assignation.
@@ -24,7 +26,8 @@ impl Chess {
         Self {
             trial_ops: 0,
             discard_ops: 0,
-            queens: vec![(0..size).into_iter().collect(); size],
+            queens: vec![vec![true; size]; size],
+            queens_count: vec![size; size],
             discarded_pairs: Vec::new(),
             discarded_count: Vec::new()
         }
@@ -40,6 +43,7 @@ impl Chess {
 
         let index = r.unwrap();
         let values = self.select_values(index);
+        let len_values = values.len();
         let current_set = self.queens[index].clone();
 
         for value in values {
@@ -52,6 +56,7 @@ impl Chess {
             }
 
             self.queens[index].clone_from(&current_set);
+            self.queens_count[index] = len_values;
         }
 
         false
@@ -98,11 +103,15 @@ impl Chess {
         let count = self.discarded_count.pop().unwrap();
         self.discarded_count.push(count + 1);
 
-        match self.queens[index].len() {
-            0 => false,
-            1 => self.propagate(index, self.get_value(index)),
-            _ => true,
+        if self.queens_count[index] == 0 {
+            return false;
+        } else if self.queens_count[index] == 1 {
+            if ! self.propagate(index, self.get_value(index)) {
+                return false;
+            }
         }
+
+        true
     }
 
     /// Undo last assignation (restore constraints).
@@ -130,26 +139,36 @@ impl Chess {
 
     /// Clear a row (empty candidates).
     fn clear_row(&mut self, index: usize) {
-        self.queens[index].clear();
+        self.queens[index].fill(false);
+        self.queens_count[index] = 0;
     }
 
     /// Push a candidate value back to a row.
     fn push_candidate(&mut self, index: usize, value: usize) {
-        self.queens[index].insert(value);
+        if !self.queens[index][value] {
+            self.queens[index][value] = true;
+            self.queens_count[index] += 1;
+        }
     }
 
     /// Remove a candidate from a row.
     fn remove_candidate(&mut self, index: usize, value: usize) -> bool {
-        self.queens[index].remove(&value)
+        if self.queens[index][value] {
+            self.queens[index][value] = false;
+            self.queens_count[index] -= 1;
+            true
+        } else {
+            false
+        }
     }
 
     /// Get index of an unsolved row (minimum remaining values heuristics).
     fn select_index(&self) -> Option<usize> {
-        let mut min_size = self.queens.len() + 1;
+        let mut min_size = self.queens_count.len() + 1;
         let mut min_index: usize = 0;
 
-        for i in 0..self.queens.len() {
-            let size = self.queens[i].len();
+        for i in 0..self.queens_count.len() {
+            let size = self.queens_count[i];
 
             if size > 1 && size < min_size {
                 min_index = i;
@@ -157,21 +176,20 @@ impl Chess {
             }
         }
 
-        if min_size == self.queens.len() + 1 { None } else { Some(min_index) }
+        if min_size == self.queens_count.len() + 1 { None } else { Some(min_index) }
     }
 
     /// Select all available indices from a row.
-    fn select_values(&self, index: usize) -> HashSet<usize> {
-        self.queens[index].clone()
+    fn select_values(&self, index: usize) -> Vec<usize> {
+        let row = &self.queens[index];
+        let mut values: Vec<usize> = (0..row.len()).filter(|&s| row[s]).collect();
+        values.shuffle(&mut thread_rng());
+        values
     }
 
     /// Get the __only__ value that is set in the array.
     fn get_value(&self, index: usize) -> usize {
-        for &i in &self.queens[index] {
-            return i;
-        }
-
-        panic!("Empty row")
+        self.queens[index].iter().position(|&s| s).unwrap()
     }
 }
 
@@ -179,7 +197,7 @@ impl fmt::Display for Chess {
     /// Representation of the chessboard.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for i in 0..self.queens.len() {
-            if self.queens[i].len() == 1 {
+            if self.queens_count[i] == 1 {
                 if let Err(x) = writeln!(f, "Queen {}: square {}", i + 1, self.get_value(i)) {
                     return Err(x);
                 }
