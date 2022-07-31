@@ -7,9 +7,9 @@ use rand::{thread_rng, seq::SliceRandom};
 
 pub struct Chess {
     /// Number of calls to assign().
-    trials: u64,
+    trial_ops: u64,
     /// Number of calls to discard().
-    discards: u64,
+    discard_ops: u64,
     /// Queens' positions (set of candidate positions).
     queens: Vec<Vec<bool>>,
     /// Number of available values.
@@ -24,8 +24,8 @@ impl Chess {
     /// Constructor.
     pub fn new(size: usize) -> Self {
         Self {
-            trials: 0,
-            discards: 0,
+            trial_ops: 0,
+            discard_ops: 0,
             queens: vec![vec![true; size]; size],
             queens_count: vec![size; size],
             discarded_pairs: Vec::new(),
@@ -64,34 +64,26 @@ impl Chess {
 
     /// Get number of total tries of assignation.
     pub fn trials(&self) -> u64 {
-        self.trials
+        self.trial_ops
     }
 
     /// Get number of total discards.
     pub fn discards(&self) -> u64 {
-        self.discards
+        self.discard_ops
     }
 
     /// Assign a value to a row and propagate constraints.
     fn assign(&mut self, index: usize, value: usize) -> bool {
-        self.trials += 1;
-        self.queens[index].fill(false);
-        self.queens_count[index] = 0;
+        self.trial_ops += 1;
+        self.clear_row(index);
         self.discarded_count.push(0);
 
-        for i in 0..self.queens.len() {
-            if i == index {
-                continue;
-            }
-
-            if !self.discard(i, value) || (value + index >= i && !self.discard(i, value + index - i)) || (value + i >= index && !self.discard(i, value + i - index)) {
-                self.restore_last();
-                return false;
-            }
+        if !self.propagate(index, value) {
+            self.restore_last();
+            return false;
         }
 
-        self.queens[index][value] = true;
-        self.queens_count[index] = 1;
+        self.push_candidate(index, value);
         true
     }
 
@@ -101,13 +93,11 @@ impl Chess {
             return true;
         }
 
-        if !self.queens[index][value] {
+        if !self.remove_candidate(index, value) {
             return true;
         }
 
-        self.discards += 1;
-        self.queens[index][value] = false;
-        self.queens_count[index] -= 1;
+        self.discard_ops += 1;
         self.discarded_pairs.push((index, value));
 
         let count = self.discarded_count.pop().unwrap();
@@ -116,16 +106,8 @@ impl Chess {
         if self.queens_count[index] == 0 {
             return false;
         } else if self.queens_count[index] == 1 {
-            let value = self.get_value(index);
-
-            for i in 0..self.queens.len() {
-                if i == index {
-                    continue;
-                }
-
-                if !self.discard(i, value) || (value + index >= i && !self.discard(i, value + index - i)) || (value + i >= index && !self.discard(i, value + i - index)) {
-                    return false;
-                }
+            if ! self.propagate(index, self.get_value(index)) {
+                return false;
             }
         }
 
@@ -138,10 +120,45 @@ impl Chess {
 
         for _ in 0..count {
             let (index, value) = self.discarded_pairs.pop().unwrap();
-            if !self.queens[index][value] {
-                self.queens[index][value] = true;
-                self.queens_count[index] += 1;
+            self.push_candidate(index, value);
+        }
+    }
+
+    /// Propagate constraints.
+    fn propagate(&mut self, index: usize, value: usize) -> bool {
+        for i in 0..self.queens.len() {
+            if i != index {
+                if !self.discard(i, value) || (value + index >= i && !self.discard(i, value + index - i)) || (value + i >= index && !self.discard(i, value + i - index)) {
+                    return false;
+                }
             }
+        }
+
+        true
+    }
+
+    /// Clear a row (empty candidates).
+    fn clear_row(&mut self, index: usize) {
+        self.queens[index].fill(false);
+        self.queens_count[index] = 0;
+    }
+
+    /// Push a candidate value back to a row.
+    fn push_candidate(&mut self, index: usize, value: usize) {
+        if !self.queens[index][value] {
+            self.queens[index][value] = true;
+            self.queens_count[index] += 1;
+        }
+    }
+
+    /// Remove a candidate from a row.
+    fn remove_candidate(&mut self, index: usize, value: usize) -> bool {
+        if self.queens[index][value] {
+            self.queens[index][value] = false;
+            self.queens_count[index] -= 1;
+            true
+        } else {
+            false
         }
     }
 

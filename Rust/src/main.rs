@@ -6,7 +6,7 @@ mod chess;
 
 use std::env;
 use std::process::exit;
-use std::time::Instant;
+use std::time::{Instant,Duration};
 use chess::Chess;
 
 const DEFAULT_SIZE: usize = 100;
@@ -16,15 +16,13 @@ fn main() {
     let mut chess = Chess::new(size);
 
     let now = Instant::now();
-    chess.solve();
-    let duration = now.elapsed();
 
-    print!("{}", chess);
-    eprintln!("Trials:      {}", chess.trials());
-    eprintln!("Discards:    {}", chess.discards());
-    eprintln!("Time:        {:.3} ms.", duration.as_millis());
-    eprintln!("Performance: {:.3} steps/μs.", chess.trials() as f64 / duration.as_micros() as f64);
-    eprintln!("             {:.3} discards/μs.", chess.discards() as f64 / duration.as_micros() as f64);
+    if !chess.solve() {
+        panic!("Cannot resolve the problem");
+    }
+
+    print_results(&chess, now.elapsed());
+
 }
 
 /// Parse arguments. Returns the chess size.
@@ -41,4 +39,14 @@ fn parse_args() -> usize {
     }
 
     size
+}
+
+/// Print algorithm results into stdout and stderr.
+fn print_results(chess: &Chess, duration: Duration) {
+    print!("{}", chess);
+    eprintln!("Trials:      {}", chess.trials());
+    eprintln!("Discards:    {}", chess.discards());
+    eprintln!("Time:        {:.3} ms.", duration.as_millis());
+    eprintln!("Performance: {:.3} steps/μs.", chess.trials() as f64 / duration.as_micros() as f64);
+    eprintln!("             {:.3} discards/μs.", chess.discards() as f64 / duration.as_micros() as f64);
 }
