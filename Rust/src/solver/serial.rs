@@ -2,6 +2,8 @@
 // Copyleft 2022 Vikman - All rights revoked.
 // August 5, 2022
 
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use crate::chess::Chess;
 use super::Solver;
 
@@ -15,6 +17,8 @@ pub struct SerialSolver {
     chess: Chess,
     /// Discarded candidates (index-value).
     discarded_pairs: Vec<Vec<(usize, usize)>>,
+    /// Active flag.
+    active: Arc<AtomicBool>,
 }
 
 impl SerialSolver {
@@ -25,11 +29,16 @@ impl SerialSolver {
             discard_ops: 0,
             chess,
             discarded_pairs: Vec::new(),
+            active: Arc::new(AtomicBool::new(true)),
         }
     }
 
     /// Branch a level down.
     pub fn branch(&mut self) -> bool {
+        if ! self.active.load(Ordering::Relaxed) {
+            return false;
+        }
+
         let index = self.chess.min_index();
 
         if index.is_none() {
@@ -41,10 +50,18 @@ impl SerialSolver {
 
     /// Local search.
     fn search(&mut self, index: usize) -> bool {
+        if ! self.active.load(Ordering::Relaxed) {
+            return false;
+        }
+
         let values = self.chess[index].as_vec();
         let current_set = self.chess[index].clone();
 
         for value in values {
+            if ! self.active.load(Ordering::Relaxed) {
+                return false;
+            }
+
             if self.assign(index, value) {
                 if self.branch() {
                     return true;
@@ -70,6 +87,14 @@ impl SerialSolver {
 
         self.chess[index].push(value);
         true
+    }
+
+    pub fn stop(&mut self) {
+        self.active.store(false, Ordering::Relaxed);
+    }
+
+    pub fn is_stopped(&self) -> bool {
+        self.active.load(Ordering::Relaxed)
     }
 
     /// Discard candidate values (constraints propagation).

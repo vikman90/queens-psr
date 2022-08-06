@@ -3,8 +3,8 @@
 // August 4, 2022
 
 use std::sync::{mpsc, Mutex, Arc};
-use mpsc::{Sender, Receiver, channel};
-use std::thread;
+use mpsc::{Sender, Receiver};
+use std::thread::{self, JoinHandle};
 
 use num_cpus;
 
@@ -27,6 +27,8 @@ pub struct ParallelSolver {
     trial_ops: u64,
     /// Number of calls to discard().
     discard_ops: u64,
+    /// Threads.
+    threads: Vec<JoinHandle<()>>,
 }
 
 impl ParallelSolver {
@@ -39,7 +41,8 @@ impl ParallelSolver {
             values,
             pending_results: 0,
             trial_ops: 0,
-            discard_ops: 0
+            discard_ops: 0,
+            threads: Vec::new(),
         }
     }
 
@@ -50,26 +53,37 @@ impl ParallelSolver {
                 let solver = self.root.clone();
                 work_tx.send((solver, value)).unwrap();
                 self.pending_results += 1;
+                true
             },
 
-            None => (),
+            None => false,
         }
-
-        if self.values.is_empty() && self.pending_results == 0 { false } else { true }
     }
 
     /// Process result from a thread.
-    fn process_result(&mut self, solver: SerialSolver, is_solved: bool) -> bool {
+    fn process_result(&mut self, solver: SerialSolver, is_solved: bool) {
         self.trial_ops += solver.trials();
         self.discard_ops += solver.discards();
+        self.pending_results -= 1;
 
         if is_solved {
             self.root = solver;
-            true
-        } else {
-            self.pending_results -= 1;
-            false
         }
+    }
+
+    fn start_threads(&mut self) -> (Sender<(SerialSolver, usize)>, Receiver<Message>) {
+        let (work_tx, work_rx) = mpsc::channel();
+        let (result_tx, result_rx) = mpsc::channel();
+        let work_rx_lock = Arc::new(Mutex::new(work_rx));
+
+        self.threads = (0..num_cpus::get()).map(|_| {
+            let rx = Arc::clone(&work_rx_lock);
+            let tx = result_tx.clone();
+
+            thread::spawn(move || { thread_run(rx, tx);})
+        }).collect();
+
+        (work_tx, result_rx)
     }
 }
 
@@ -91,40 +105,47 @@ impl Solver for ParallelSolver {
 
     /// Solve queens problem.
     fn solve(&mut self) -> bool {
-        let (work_tx, result_rx) = start_threads();
+        let mut solved = false;
 
-        loop {
-            match result_rx.recv().unwrap() {
-                Message::Ready => {
-                    if !self.send_work(&work_tx) {
-                        break;
+        {
+            let (work_tx, result_rx) = self.start_threads();
+
+            loop {
+                match result_rx.recv().unwrap() {
+                    Message::Ready => {
+                        if !self.send_work(&work_tx) {
+                            break;
+                        }
+                    },
+                    Message::Result((solver, is_solved)) => {
+                        self.process_result(solver, is_solved);
+
+                        if is_solved {
+                            solved = true;
+                            break;
+                        }
                     }
-                },
-                Message::Result((solver, is_solved)) => {
-                    if self.process_result(solver, is_solved) {
-                        return true;
+                }
+            }
+
+            self.root.stop();
+
+            while self.pending_results > 0 {
+                match result_rx.recv().unwrap() {
+                    Message::Ready => (),
+                    Message::Result((solver, is_solved)) => {
+                        self.process_result(solver, is_solved);
                     }
                 }
             }
         }
 
-        false
+        while let Some(t) = self.threads.pop() {
+            _ = t.join();
+        }
+
+        solved
     }
-}
-
-fn start_threads() -> (Sender<(SerialSolver, usize)>, Receiver<Message>) {
-    let (work_tx, work_rx) = channel();
-    let (result_tx, result_rx) = channel();
-    let work_rx_lock = Arc::new(Mutex::new(work_rx));
-
-    for _ in 0..num_cpus::get() {
-        let rx = Arc::clone(&work_rx_lock);
-        let tx = result_tx.clone();
-
-        thread::spawn(move || { thread_run(rx, tx);});
-    }
-
-    (work_tx, result_rx)
 }
 
 fn thread_run(work_rx_lock: Arc<Mutex<Receiver<(SerialSolver, usize)>>>, result_tx: Sender<Message>) {
@@ -145,8 +166,13 @@ fn thread_run(work_rx_lock: Arc<Mutex<Receiver<(SerialSolver, usize)>>>, result_
         }
 
         let is_solved = solver.assign(0, value) && solver.branch();
+        let is_stopped = solver.is_stopped();
 
         if let Err(_) = result_tx.send(Message::Result((solver, is_solved))) {
+            return;
+        }
+
+        if is_stopped {
             return;
         }
     }
