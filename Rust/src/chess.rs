@@ -14,6 +14,7 @@ pub struct ChessRow {
     count: usize,
 }
 
+#[derive(Clone)]
 pub struct Chess {
     /// Chess rows.
     queens: Vec<ChessRow>,
@@ -87,6 +88,23 @@ impl Chess {
     /// Get the length of the chess.
     pub fn len(&self) -> usize {
         self.queens.len()
+    }
+
+    /// Get index of an unsolved row (minimum remaining values heuristics).
+    pub fn min_index(&self) -> Option<usize> {
+        let mut min_size = self.queens.len() + 1;
+        let mut min_index: usize = 0;
+
+        for i in 0..self.queens.len() {
+            let size = self.queens[i].count();
+
+            if size > 1 && size < min_size {
+                min_index = i;
+                min_size = size;
+            }
+        }
+
+        if min_size == self.queens.len() + 1 { None } else { Some(min_index) }
     }
 }
 

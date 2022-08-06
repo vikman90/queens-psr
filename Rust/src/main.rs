@@ -9,14 +9,26 @@ use std::env;
 use std::process::exit;
 use std::time::{Instant,Duration};
 use chess::Chess;
-use solver::Solver;
+use solver::{Solver,SerialSolver, ParallelSolver};
 
 const DEFAULT_SIZE: usize = 100;
 
 fn main() {
-    let size = parse_args();
+    let (size, parallel) = parse_args();
     let chess = Chess::new(size);
-    let mut solver = Solver::new(chess);
+
+    let solver: &mut dyn Solver;
+
+    let mut serial_solver: SerialSolver;
+    let mut parallel_solver: ParallelSolver;
+
+    if parallel {
+        parallel_solver = ParallelSolver::new(chess);
+        solver = &mut parallel_solver;
+    } else {
+        serial_solver = SerialSolver::new(chess);
+        solver = &mut serial_solver;
+    }
 
     let now = Instant::now();
 
@@ -24,28 +36,31 @@ fn main() {
         panic!("Cannot resolve the problem");
     }
 
-    print_results(&solver, now.elapsed());
+    print_results(solver, now.elapsed());
 
 }
 
-/// Parse arguments. Returns the chess size.
-fn parse_args() -> usize {
+/// Parse arguments. Returns the chess size and the parallel mode
+fn parse_args() -> (usize, bool) {
     let mut size = DEFAULT_SIZE;
+    let mut parallel = false;
 
     for arg in env::args() {
         if arg == "-h" || arg == "--help" {
-            println!("Syntax: queens <NUMBER>");
+            println!("Syntax: queens [-p] <NUMBER>");
             exit(0);
+        } else if arg == "-p" || arg == "--parallel" {
+            parallel = true;
         } else if let Ok(v) = arg.parse::<usize>() {
             size = v;
         }
     }
 
-    size
+    (size, parallel)
 }
 
 /// Print algorithm results into stdout and stderr.
-fn print_results(solver: &Solver, duration: Duration) {
+fn print_results(solver: &dyn Solver, duration: Duration) {
     print!("{}", solver.chess());
     eprintln!("Trials:      {}", solver.trials());
     eprintln!("Discards:    {}", solver.discards());
