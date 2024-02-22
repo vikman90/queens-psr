@@ -16,13 +16,13 @@
 #
 ################################################################################
 
-from sys import argv
-from time import clock
+from sys import argv, exit, stdout
+from time import perf_counter
 from subprocess import check_output, TimeoutExpired, CalledProcessError
 
 if __name__ == '__main__':
     if len(argv) < 5:
-        print('Uso', argv[0], '<step> <stop> <secs> <tries> <program>')
+        print('Usage:', argv[0], '<step> <stop> <secs> <tries> <program>')
         exit(1)
 
     step = int(argv[1])
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     maxsteps = 0
     maxdiscards = 0
     maxmillis = 0
-    time = clock()
+    time = perf_counter()
 
     for n in range(step, stop + 1, step):
         try:
@@ -50,16 +50,18 @@ if __name__ == '__main__':
                 nmillis = 0
 
                 try:
+                    print(f'{n}: ', end='')
+                    stdout.flush()
                     output = check_output(program + ['-test', str(n)], \
                                           timeout = timemax).decode()
                     fileout.write(str(n) + '\t' + output)
-                    print(str(n) + ": " + output[:-1])
+                    print(output[:-1])
 
                     nsuccess += 1
                     data = output.split()
                     nsteps = int(data[0])
                     ndiscards = int(data[1])
-                    nmillis = int(data[2])
+                    nmillis = int(data[2]) / 1000
                     sumsteps += nsteps
                     sumdiscards += ndiscards
                     summillis += nmillis
@@ -76,11 +78,11 @@ if __name__ == '__main__':
                     break
 
                 except TimeoutExpired:
-                    print(str(n) + ': timeout.')
+                    print('[Timeout]')
                     continue
 
                 except CalledProcessError:
-                    print(str(n) + ': program error.')
+                    print('[Program error]')
                     continue
 
             if not nsteps:
@@ -89,18 +91,17 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             break
 
-    time = clock() - time
+    time = perf_counter() - time
     fileout.close()
 
-    print('\n\tResults:')
-    print('{} / {} programs solved'.format(nsuccess, ntotal))
-    print('Total: {} steps, {} discards, {} ms.'.format( \
-        nsteps, ndiscards, nmillis))
-    print('Mean: {} steps, {} discards, {} ms.'.format( \
-        round(sumsteps / nsuccess), round(sumdiscards / nsuccess), \
-        round(summillis / nsuccess)))
-    print("Maximum: {} steps, {} discards, {} ms.".format( \
-        maxsteps, maxdiscards, maxmillis))
-    print('Performance: {} steps/ms, {} discards/ms.'.format( \
-        round(maxsteps / maxmillis), round(maxdiscards / maxmillis)))
-    print('Runtime (launcher): {} sec.'.format(time))
+    print('\n================================ Results ================================\n')
+    print(f'{nsuccess} / {ntotal} programs solved')
+
+    if nsuccess == 0 or summillis == 0:
+        exit(1)
+
+    print(f'Total: {sumsteps} steps, {sumdiscards} discards, {summillis:.03f} ms.')
+    print(f'Mean: {(sumsteps / nsuccess):.0f} steps, {(sumdiscards / nsuccess):.0f} discards, {(summillis / nsuccess):.0f} ms.')
+    print(f'Maximum: {maxsteps} steps, {maxdiscards} discards, {maxmillis} ms.')
+    print(f'Performance: {(sumsteps / summillis):.0f} steps/ms, {(sumdiscards / summillis):.0f} discards/ms.')
+    print(f'Runtime (launcher): {time:0.3f} sec.')
