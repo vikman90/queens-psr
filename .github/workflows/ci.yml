@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-cpp:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: make -C C++
+    - name: Archive
+      run: tar -zcvf build-cpp.tar.gz C++/queens
+    - uses: actions/upload-artifact@v4.3.1
+      with:
+        name: build-cpp
+        path: build-cpp.tar.gz
+
+  build-java:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: make -C Java
+    - uses: actions/upload-artifact@v4.3.1
+      with:
+        name: build-java
+        path: Java/queens.jar
+
+  launch-cpp:
+
+    runs-on: ubuntu-latest
+    needs: build-cpp
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: build-cpp
+    - name: Unarchive
+      run: tar -zxvf build-cpp.tar.gz
+    - name: Launch
+      run: ./launch.py 100 1000 5 3 C++/queens
+
+  launch-java:
+
+    runs-on: ubuntu-latest
+    needs: build-java
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: build-java
+    - name: Launch
+      run: ./launch.py 100 1000 5 3 java -jar queens.jar
