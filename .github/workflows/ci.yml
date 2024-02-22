@@ -35,6 +35,38 @@ jobs:
         name: build-java
         path: Java/queens.jar
 
+  build-go:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: go build -C Go
+    - name: Archive
+      run: tar -zcvf build-go.tar.gz Go/queens
+    - uses: actions/upload-artifact@v4.3.1
+      with:
+        name: build-go
+        path: build-go.tar.gz
+
+  build-rust:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: |
+        cd Rust
+        cargo build -r
+    - name: Archive
+      run: tar -zcvf build-rust.tar.gz Rust/target/release/queens
+    - uses: actions/upload-artifact@v4.3.1
+      with:
+        name: build-rust
+        path: build-rust.tar.gz
+
   launch-cpp:
 
     runs-on: ubuntu-latest
