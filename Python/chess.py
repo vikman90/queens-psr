@@ -9,8 +9,6 @@
 ################################################################################
 
 from copy import copy
-from time import clock
-from sys import argv
 from random import seed, randint
 
 seed()

@@ -8,11 +8,11 @@
 # February 8, 2013
 #
 # Syntax: python queens.py [-test] [N]
-# 
+#
 ################################################################################
 
 from chess import Chess
-from time import clock
+from time import perf_counter
 from sys import argv
 
 if __name__ == "__main__":
@@ -33,11 +33,11 @@ if __name__ == "__main__":
             n = int(input("Enter number of queens: "))
         except ValueError:
             n = 0
-            
+
     chess = Chess(n)
-    time = clock()
+    time = perf_counter()
     chess.solve()
-    time = int((clock() - time) * 1000)
+    time = int((perf_counter() - time) * 1000)
 
     if testing:
         print(str(chess.steps()) + "\t" + str(chess.discards()) + "\t" + str(time));
