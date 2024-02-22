@@ -62,3 +62,21 @@ jobs:
         name: build-java
     - name: Launch
       run: ./launch.py 100 1000 5 3 java -jar queens.jar
+
+  launch-python:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Launch
+      run: ./launch.py 100 1000 5 3 Python/queens.py
+
+  launch-js:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Launch
+      run: ./launch.py 100 1000 5 3 node JS/queens.js
