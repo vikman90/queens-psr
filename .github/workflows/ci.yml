@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  STEP: 16
+  STOP: 256
+  TIMEOUT: 1
+  ATTEMPTS: 3
+
+
 jobs:
   build-cpp:
 
@@ -80,7 +87,7 @@ jobs:
     - name: Unarchive
       run: tar -zxvf build-cpp.tar.gz
     - name: Launch
-      run: ./launch.py 100 1000 5 3 C++/queens
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS C++/queens
 
   launch-java:
 
@@ -93,7 +100,7 @@ jobs:
       with:
         name: build-java
     - name: Launch
-      run: ./launch.py 100 1000 5 3 java -jar queens.jar
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS java -jar queens.jar
 
   launch-python:
 
@@ -102,7 +109,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Launch
-      run: ./launch.py 100 1000 5 3 Python/queens.py
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS Python/queens.py
 
   launch-js:
 
@@ -111,7 +118,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Launch
-      run: ./launch.py 100 1000 5 3 node JS/queens.js
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS node JS/queens.js
 
   launch-php:
 
@@ -120,7 +127,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Launch
-      run: ./launch.py 100 1000 5 3 php PHP/queens.php
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS php PHP/queens.php
 
   launch-go:
 
@@ -135,4 +142,4 @@ jobs:
     - name: Unarchive
       run: tar -zxvf build-go.tar.gz
     - name: Launch
-      run: ./launch.py 100 1000 5 3 Go/queens
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS Go/queens
