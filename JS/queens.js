@@ -27,16 +27,16 @@ if (isNaN(n) || n < 4) {
 
 var chess = new libchess.Chess(n)
 var hrtime = process.hrtime()
-var time = hrtime[0] + hrtime[1] / 1e9
+var time = hrtime[0] *1e6 + hrtime[1] / 1e3
 
 chess.solve()
 
 hrtime = process.hrtime()
-time = parseInt((hrtime[0] + hrtime[1] / 1e9 - time) * 1000)
+time = parseInt((hrtime[0] *1e6 + hrtime[1] / 1e3 - time))
 
 if (testing)
     console.log(String(chess.steps()) + "\t" + chess.discards() + "\t" + time)
 else {
     console.log(String(chess))
-    console.log("Solved in " + chess.steps() + " steps. Time: " + time + " ms.")
+    console.log("Solved in " + chess.steps() + " steps. Time: " + time / 1000 + " ms.")
 }
