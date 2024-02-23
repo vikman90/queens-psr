@@ -34,7 +34,7 @@ while ($n < 4)
 $chess = new Chess($n);
 $time = microtime(true);
 $chess->solve();
-$time = (int)((microtime(true) - $time) * 1000);
+$time = (int)((microtime(true) - $time) * 1e6);
 $steps = $chess->steps();
 $discards = $chess->discards();
 
@@ -42,5 +42,6 @@ if ($testing)
     echo "$steps\t$discards\t$time\n";
 else {
     echo $chess;
+    $time /= 1000;
     echo "Solved in $steps steps. Time: $time ms.\n";
 }
