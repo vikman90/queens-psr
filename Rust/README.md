@@ -2,24 +2,31 @@
 
 ## Rust implementation
 
-### Set up
+### Set up (Ubuntu 22.04)
 
-```sh
-yum install rustc cargo
+```shell
+apt install cargo
+```
+
+### Build
+
+```shell
 cargo build --release
 ```
 
 ### Syntax
 
 ```
-queens [-h] [-p] [SIZE]
+queens [-h] [-p] [-test] [SIZE]
 ```
 
 <dl>
   <dt>-h</dt>
-  <dd>Show help.</dd>
+  <dd>Print help.</dd>
   <dt>-p</dt>
   <dd>Enable parallel mode.</dd>
+  <dt>-test</dt>
+  <dd>Enable test output.</dd>
   <dt>SIZE</dt>
   <dd>Length of the chess.</dd>
 </dl>
@@ -27,17 +34,16 @@ queens [-h] [-p] [SIZE]
 ### Example
 
 ```
-# cargo run --release -- -p 4000
+# cargo run --release -- -p 1024
 
-Queen 1: square 1252
-Queen 2: square 2295
+Queen 1: square 313
+Queen 2: square 3
 (...)
-Queen 3999: square 3509
-Queen 4000: square 1655
-
-Trials:      58765
-Discards:    182326630
-Time:        4539 ms.
-Performance: 0.013 steps/μs.
-             40.167 discards/μs.
+Queen 1023: square 776
+Queen 1024: square 549
+Trials:      12290
+Discards:    10912362
+Time:        654 ms.
+Performance: 0.019 steps/μs.
+             16.678 discards/μs.
 ```
