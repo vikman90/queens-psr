@@ -143,3 +143,18 @@ jobs:
       run: tar -zxvf build-go.tar.gz
     - name: Launch
       run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS Go/queens
+
+  launch-rust:
+
+    runs-on: ubuntu-latest
+    needs: build-rust
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: build-rust
+    - name: Unarchive
+      run: tar -zxvf build-rust.tar.gz
+    - name: Launch
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS Rust/target/release/queens
