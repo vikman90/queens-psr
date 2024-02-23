@@ -74,6 +74,21 @@ jobs:
         name: build-rust
         path: build-rust.tar.gz
 
+  build-cs:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: dotnet build --configuration Release C#/queens.csproj
+    - name: Archive
+      run: tar -zcvf build-cs.tar.gz C#/bin/Release/net8.0/queens{,.dll,.runtimeconfig.json}
+    - uses: actions/upload-artifact@v4.3.1
+      with:
+        name: build-cs
+        path: build-cs.tar.gz
+
   launch-cpp:
 
     runs-on: ubuntu-latest
@@ -158,3 +173,18 @@ jobs:
       run: tar -zxvf build-rust.tar.gz
     - name: Launch
       run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS Rust/target/release/queens
+
+  launch-cs:
+
+    runs-on: ubuntu-latest
+    needs: build-cs
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: build-cs
+    - name: Unarchive
+      run: tar -zxvf build-cs.tar.gz
+    - name: Launch
+      run: ./launch.py $STEP $STOP $TIMEOUT $ATTEMPTS C#/bin/Release/net8.0/queens
