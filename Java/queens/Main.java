@@ -42,16 +42,16 @@ public class Main {
         }
 
         chess = new Chess(n);
-        time = System.currentTimeMillis();
+        time = System.nanoTime();
         chess.solve();
-        time = System.currentTimeMillis() - time;
+        time = System.nanoTime() - time;
 
         if (testing) {
-            System.out.println(chess.getSteps() + "\t" + chess.getDiscards() + "\t" + time);
+            System.out.println(chess.getSteps() + "\t" + chess.getDiscards() + "\t" + time / 1000);
         } else {
             System.out.println(chess);
             System.out.print("Solved in " + chess.getSteps() + " steps. ");
-            System.out.println("Time: " + time + " ms.");
+            System.out.println("Time: " + time / 1000000 + " ms.");
         }
     }
 }

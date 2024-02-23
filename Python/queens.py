@@ -37,10 +37,10 @@ if __name__ == "__main__":
     chess = Chess(n)
     time = perf_counter()
     chess.solve()
-    time = int((perf_counter() - time) * 1000)
+    time = int((perf_counter() - time) * 1e6)
 
     if testing:
         print(str(chess.steps()) + "\t" + str(chess.discards()) + "\t" + str(time));
     else:
         print(chess)
-        print("Solved in", chess.steps(), "steps. Time:", time, "ms.")
+        print("Solved in", chess.steps(), "steps. Time:", time / 1000, "ms.")

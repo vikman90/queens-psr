@@ -7,7 +7,7 @@
  * February 8, 2013
  *
  * Syntax: queens [-test] [N]
- * 
+ *
  ******************************************************************************/
 
 using System;
@@ -42,7 +42,7 @@ namespace Queens
             time = DateTime.Now.Ticks - time;
 
             if (testing)
-                Console.WriteLine(chess.Steps + "\t" + chess.Discards + "\t" + time / 10000);
+                Console.WriteLine(chess.Steps + "\t" + chess.Discards + "\t" + time / 10);
             else
             {
                 Console.WriteLine(chess.ToString());
